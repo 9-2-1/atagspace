@@ -1,0 +1,140 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+
+@font-face {
+  font-family: "Fira Mono";
+  font-display: swap;
+  src:
+    url("FiraMono-Regular.woff2") format("woff2"),
+    url("FiraMono-Regular.woff") format("woff"),
+    url("FiraMono-Regular.ttf") format("truetype");
+}
+
+* {
+  box-sizing: border-box;
+  font-family: "Fira Mono", "Courier New", Courier, monospace;
+}
+
+textarea {
+  resize: vertical;
+}
+
+.screen {
+  height: 100vh;
+  width: 100vw;
+}
+
+.border {
+  border: 1px grey solid;
+}
+
+.hsplit {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: space-around;
+}
+
+.hsplit > * {
+  flex: 1 1 auto;
+}
+
+.hscroll {
+  overflow-y: auto;
+  justify-content: flex-start;
+}
+
+.vsplit {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  justify-content: space-around;
+}
+
+.vlist {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  justify-content: space-around;
+  flex-wrap: wrap;
+}
+
+.vsplit > *,
+.vlist > * {
+  flex: 1 1 auto;
+}
+
+.h-0,
+.v-0 {
+  flex: 0 0 auto;
+}
+
+.h-1,
+.v-1 {
+  flex: 1 1 0;
+  overflow: auto;
+}
+
+.h-2,
+.v-2 {
+  flex: 2 2 0;
+  overflow: auto;
+}
+
+.h-3,
+.v-3 {
+  flex: 3 3 0;
+  overflow: auto;
+}
+
+input[type="color"] {
+  padding: 0;
+}
+
+.check {
+  color: var(--fgcolor);
+  background-color: var(--bgcolor);
+  margin: 3px;
+  padding: 0px 2px;
+  border-radius: 4px;
+  border: 2px solid var(--bgcolor);
+  outline: 2px solid var(--bgcolor);
+}
+
+.check.indeterminate {
+  border: 2px dashed var(--fgcolor);
+}
+
+.check.checked {
+  border: 2px solid var(--fgcolor);
+}
+
+.check.focused {
+  border-bottom: 2px dotted var(--fgcolor);
+}
+
+.noselect {
+  user-select: none;
+}
+
+.file {
+  overflow: hidden;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.tag,
+.category {
+  display: inline-block;
+  --fgcolor: black;
+  --bgcolor: rgb(232, 232, 232);
+}
+
+.file {
+  padding: 1px;
+  --fgcolor: rgb(63, 63, 63);
+  --bgcolor: rgb(255, 255, 255);
+  border-color: rgb(221, 221, 221);
+}

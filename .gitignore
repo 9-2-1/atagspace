@@ -1,0 +1,15 @@
+# vim
+*.swp
+*.swo
+*.un~
+
+# python
+__pycache__
+.mypy_cache
+
+# typescript
+*.js
+
+# database
+*.db
+*.db-*

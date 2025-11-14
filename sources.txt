@@ -1,0 +1,12 @@
+Screenshots|D:\Pictures\Screenshots
+Saved Pictures|D:\Pictures\Saved Pictures
+Camera Roll|D:\Pictures\Camera Roll
+Downloads|D:\Downloads
+139|F:\分类\139
+aliyun|F:\分类\aliyun
+baidu|F:\分类\baidu
+qbit|F:\分类\qbit
+quark|F:\分类\quark
+xunlei|F:\分类\xunlei
+下载|F:\分类\下载
+有损压缩|F:\分类\有损压缩

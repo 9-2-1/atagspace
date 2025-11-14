@@ -1,0 +1,147 @@
+问题
+
+文件分类问题
+
+软件/工具类
+  文件早期的分类方法意义不大，使用的时候仍然依赖搜索。
+  一些文件在需要的时候被忽略。
+
+感兴趣的内容（游戏，动画，视频，科普，主题……）
+  一些感兴趣的内容想在闲时查看，但是往往被忽略。
+  阅读列表。这意味着之后会查看。
+  可以分为准备（为之后的事情做准备）和兴趣（科技，算法）和娱乐（动画，游戏）三大类。
+
+看完但保留（备份）
+  动画，软件等。难以下载的。
+
+照片
+  照片没有标注，使用默认名字，需要时找不到。重要的。
+
+纪念
+  内容分类困难，分类前需要长时间阅读，体验很差
+  标签打错
+  一些文件意图和标题无关，需要注解
+
+  有纪念意义的文件，例如活动，风景，文档，产物，证书，甚至包含社区，神评论，程序
+  搞笑，科普，创意，cosplay，要素，事件……
+  对一些事件的关注。各种讨论。
+  不当推广。
+
+重要
+  证明，证件，密码，安全，...
+
+常用
+  按主题分类的常用资料，次常用资料（考试，求职等）
+
+大概的总结：
+  - 分类复杂（工具，待阅读，纪念，重要，常用）
+  - 位置杂乱要重新分类（原版2-3层的文件夹，使用错误的分类方式）
+  - 来源复杂（文件/网盘/书签/链接/···）
+  - 部分文件有多重用途。
+
+---
+
+需要做的效果：
+
+1.分类
+软件/工具类：
+  按照主题/活动/意图分类（时间管理，文件整理，文件备份）。
+  依赖项（winfsp, .NET等）单独分类。
+感兴趣的内容：
+  待阅读内容单独标记，按照类型分类（文章，动画，游戏，视频，...），按照主题分类（...）
+纪念：
+  按照事件分类。估计会有三级。纪念/事件类/事件名
+
+2.备注
+对一些难以辨识的文件增加备注。（不改原名）
+
+3.自动改名，自动整理
+结合对 html/mhtml 的自动改名
+实现按照标签规则的自动移动
+
+4.方便添加标签，输入，修改分类
+鼠标点击，输入添加，修改
+
+a.tagspace迁移
+实现tagspace格式的自动改名
+实现读取tagspace格式的标签
+忽略标签名单（待分类，。。。）
+移动/复制/重命名文件时带上 ts 标签
+
+5.分类/移动规则(用于快速分类/移动)
+标签 | - () ""
+类型,类型
+标签,类型=a: ff\标签\{a}
+
+6.标签完整检查规则
+对{类型=a}，使用“完整且不重复”的方法(必要的时候增加（不可分类）标签)
+如果冲突（使用了0个或者多个标签）增加“待分类”标签
+
+7.筛选规则
+用于筛选已经分好类的文件
+
+8.文件列表更新与追踪
+新文件：匹配已有文件的fsid/hash，如果有，迁移标签
+只有。有标签的。文件需要计算 hash.
+需要一个单独的 hash worker
+
+类/组有自己的颜色，部分标签有自己的颜色
+
+9.修复父文件夹“未标记”分类
+
+10. “整体”分类
+---
+
+实现
+
+database(peewee?)
+
+* file_tag
+source: [id, name, path, !!, %%]
+file: [id, path size mtime fsid checksum dir?, tags, deltime]
+tag_files(...) -> .
+list_file_with_tag(path, exp, recurse=False, limit=1000) -> list[path, tags]
+update_new(list[path, metadata]) -> .
+
+* checksum worker
+[id, path size mtime fsid checksum, deltime]
+psm, fsm相同 = 复制 hash
+其它 = 需要 hash
+newlist[.] 先计算 已有的，再计算 新的，配对已有的。
+
+* cate
+cate: [name, color] with 1 default
+tag: [cateid, tag, color?]
+listcate()
+setcate(cate, color?)
+renamecate(cate, new)
+listtag(cate)
+settag(tag, cate?)
+settagcolor(tag, color?)
+removetag(tag)
+getcolor(tag)
+
+---
+
+* meta_tag_fix
+  * auto_clear_tags_for_single
+  * totag file -> directory
+
+* tagspace
+onmove
+oncopy
+ondelete
+gettag
+settagname
+settagts
+
+* rulebased_move
+...
+
+* singlefilerename
+...
+
+* numbering
+...
+
+一些功能（如同步，批量移动）不需要做进WebUI.

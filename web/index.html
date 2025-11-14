@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <script src="/ms-clarity.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="index.css" />
+    <title>atagspace</title>
+    <meta name="description" content="类似 tagspaces 的文件分类工具" />
+    <script src="common.js"></script>
+    <script src="colorset.js"></script>
+    <script src="checkelem.js"></script>
+    <script src="api.js"></script>
+    <script src="index.js"></script>
+  </head>
+  <body>
+    <div class="screen hsplit">
+      <div class="h-1 vsplit noselect">
+        <div class="v-2 hsplit">
+          <div class="h-0 vsplit">
+            <button id="home" class="v-0">home</button>
+            <button id="up" class="v-0">up</button>
+            <input id="path" class="v-1" placeholder="root/path" />
+            <button id="go" class="v-0">go</button>
+          </div>
+          <div class="h-0 vsplit">
+            <span class="v-0">filter:</span>
+            <input
+              id="filter"
+              class="v-1"
+              placeholder="keyword *.txt +tag -tag **/path/**/*.ext"
+            />
+            <button id="find" class="v-0">find</button>
+          </div>
+          <div id="filelist" class="h-1 hsplit hscroll border"></div>
+        </div>
+        <div class="v-1 hsplit">
+          <div class="h-3 hsplit">
+            <div class="h-1 hsplit border">
+              <div class="h-0 vlist">
+                <span class="v-0">category:</span>
+                <button id="category_create">create</button>
+                <button id="category_delete">delete</button>
+                <button id="category_rename">rename</button>
+                <input class="v-0" id="category_color_fg" type="color" />
+                <input class="v-0" id="category_color_bg" type="color" />
+                <button id="category_color">color</button>
+                <button id="category_clear">clear</button>
+              </div>
+              <div class="h-1" id="category"></div>
+            </div>
+            <div class="h-2 hsplit border">
+              <div class="h-0 vlist">
+                <span class="v-0">tag:</span>
+                <button id="tag_add">add</button>
+                <button id="tag_remove">remove</button>
+                <input class="v-0" id="tag_color_fg" type="color" />
+                <input class="v-0" id="tag_color_bg" type="color" />
+                <button id="tag_color">color</button>
+                <button id="tag_clear">clear</button>
+              </div>
+              <div class="h-3" id="tags"></div>
+            </div>
+            <div class="h-0 vsplit">
+              <input
+                id="tagsinput"
+                class="v-1"
+                placeholder="tag1 tag2 tag3 ..."
+              />
+              <button id="tag_apply" class="v-0">apply</button>
+            </div>
+          </div>
+          <iframe
+            id="preview"
+            class="v-2 border"
+            sandbox="allow-scripts"
+            src="about:blank"
+          />
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
