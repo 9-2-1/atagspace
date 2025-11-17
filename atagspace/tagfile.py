@@ -1,15 +1,15 @@
-from datetime import datetime
 from pathlib import Path
 from dataclasses import dataclass
+import time
 import re
 import glob
 
-from .db import sqlite_db, File, Source
+from .db import File, Source
 from . import checker
 
 from alive_progress import alive_bar, config_handler
 
-config_handler.set_global(enrich_print=False, dual_line=True, length=10)
+config_handler.set_global(enrich_print=False, dual_line=True, length=10)  # type: ignore
 
 
 @dataclass
@@ -17,21 +17,20 @@ class ListFile:
     path: str
     name: str
     size: int
-    mtime: datetime
-    dev: int | None
-    ino: int | None
+    mtime: float
+    dev: int
+    ino: int
     is_dir: bool
 
 
 def tag_file(id_: int, tags: list[str]) -> None:
-    File.update(tags=" ".join(tags)).where(File.id == id_).execute()
+    File.tag(id_, " ".join(tags))
 
 
-@sqlite_db.atomic()
 def tag_file_change(id_: int, adds: list[str], removes: list[str]) -> None:
-    file = File.get_by_id(id_)
-    file.tags = " ".join([x for x in file.tags.split(" ") + adds if x not in removes])
-    file.save()
+    tags = File.get_tag(id_)
+    tags = " ".join([x for x in tags.split(" ") + adds if x not in removes])
+    File.tag(id_, tags)
 
 
 def arglist(x: str) -> list[str]:
@@ -89,23 +88,15 @@ def apply_filter(filter_: str, file: File) -> bool:
 def list_file(
     path: str, filter_: str, recurse: bool = False, limit: int = 1000
 ) -> list[File]:
-    files = File.select().where(File.deltime.is_null(True))
-    if not recurse:
-        files = files.where(File.path == path)
+    if recurse:
+        files = File.list_recurse(path)
     else:
-        if path != "":
-            files = files.where(
-                (File.path == path) | (File.path.startswith(path + "/"))
-            )
-    files = files.order_by(File.path, File.name)
-    filelist: list[File] = []
-    for file in files:
-        if apply_filter(filter_, file):
-            if recurse and limit == 0:
-                return filelist
-            filelist.append(file)
-            limit -= 1
-    return filelist
+        files = File.list(path)
+    files = [file for file in files if apply_filter(filter_, file)]
+    if recurse and limit == 0:
+        return files
+    files = files[:limit]
+    return files
 
 
 def i64(x: int) -> int:
@@ -117,7 +108,7 @@ def i64(x: int) -> int:
 
 def update_new(full: bool = False) -> None:
     # 1.update deltime
-    File.update(deltime=datetime.now()).execute()
+    File.mark_all_delete()
     filelist: list[ListFile] = []
 
     with alive_bar(title="List") as bar:
@@ -131,7 +122,7 @@ def update_new(full: bool = False) -> None:
                         path=path,
                         name=f.name,
                         size=stat.st_size,
-                        mtime=datetime.fromtimestamp(stat.st_mtime),
+                        mtime=stat.st_mtime,
                         dev=i64(stat.st_dev),
                         ino=i64(stat.st_ino),
                         is_dir=is_dir,
@@ -141,16 +132,16 @@ def update_new(full: bool = False) -> None:
                 print(f"{path}: {err}")
             bar()
 
-        for source in Source.select():
+        for source in Source.list():
             root = Path(source.path)
             filelist.append(
                 ListFile(
                     path="",
                     name=source.name,
                     size=0,
-                    mtime=datetime.now(),
-                    dev=None,
-                    ino=None,
+                    mtime=time.time(),
+                    dev=0,
+                    ino=0,
                     is_dir=True,
                 )
             )
@@ -167,7 +158,7 @@ def update_new(full: bool = False) -> None:
                     perfile(path, p / fn, False)
 
     def create_file(file: ListFile, checksum: str | None, tags: str = "") -> None:
-        File.create(
+        File.add(
             path=file.path,
             name=file.name,
             size=file.size,
@@ -177,10 +168,11 @@ def update_new(full: bool = False) -> None:
             is_dir=file.is_dir,
             checksum=checksum,
             tags=tags,
-            deltime=None,
         )
 
-    def update_existing(existing: File, file: ListFile, checksum: str | None) -> None:
+    def update_existing(
+        existing: File, file: ListFile | File, checksum: str | None
+    ) -> None:
         existing.path = file.path
         existing.name = file.name
         existing.size = file.size
@@ -189,10 +181,9 @@ def update_new(full: bool = False) -> None:
         existing.ino = file.ino
         existing.is_dir = file.is_dir
         existing.checksum = checksum
-        existing.deltime = None
-        existing.save()
+        existing.self_update()
 
-    tocheck: list[ListFile] = []
+    tocheck: list[ListFile | File] = []
     newcheck: list[ListFile] = []
 
     filelist2: list[ListFile] = []
@@ -200,7 +191,7 @@ def update_new(full: bool = False) -> None:
     with alive_bar(len(filelist), title="Update") as bar:
         for file in filelist:
             bar.text(file.path + "/" + file.name)
-            existing = File.get_or_none(path=file.path, name=file.name)
+            existing = File.reuse_get_path_name(file.path, file.name)
             if existing is not None:
                 checksum = checker.check(file, cache_only=True)
                 update_existing(existing, file, checksum)
@@ -219,7 +210,7 @@ def update_new(full: bool = False) -> None:
             bar.text(file.path + "/" + file.name)
             existing = None
             if file.dev is not None and file.ino is not None:
-                existing = File.get_or_none(File.dev == file.dev, File.ino == file.ino)
+                existing = File.reuse_get_dev_ino(file.dev, file.ino)
             if existing is not None:
                 checksum = checker.check(file, cache_only=True)
                 if existing.deltime is None:
@@ -247,15 +238,15 @@ def update_new(full: bool = False) -> None:
     with alive_bar(len(filelist), title="Size") as bar:
         for file in filelist:
             bar.text(file.path + "/" + file.name)
-            existings = File.select().where(File.size == file.size)
-            if not full:
-                existings = existings.where(File.tags != "")
+            existings = File.reuse_list_size(file.size, full)
             checksum = checker.check(file, cache_only=True)
-            if existings.exists() or full:
+            if len(existings) > 0 or full:
                 if checksum is None:
                     newcheck.append(file)
                 else:
-                    existing = existings.where(File.checksum == checksum).get_or_none()
+                    existing = next(
+                        (x for x in existings if x.checksum == checksum), None
+                    )
                     if existing is not None:
                         if existing.deltime is None:
                             print(
@@ -281,18 +272,22 @@ def update_new(full: bool = False) -> None:
     ) as bar:
         for file in tocheck:
             bar.text(file.path + "/" + file.name)
-            existing = File.get(path=file.path, name=file.name)
+            existing = File.reuse_get_path_name(file.path, file.name)
+            assert existing is not None
             checksum = checker.check(file)
             update_existing(existing, file, checksum)
             bar(file.size)
         for file in newcheck:
             bar.text(file.path + "/" + file.name)
+            existing = None
             try:
                 checksum = checker.check(file)
             except Exception as err:
                 print(f"{file}: {err}")
                 continue
-            existing = File.get_or_none(size=file.size, checksum=checksum)
+            if checksum is None:
+                continue
+            existing = File.reuse_get_size_checksum(file.size, checksum)
             if existing is not None:
                 if existing.deltime is None:
                     print(
@@ -309,9 +304,8 @@ def update_new(full: bool = False) -> None:
             bar(file.size)
 
 
-@sqlite_db.atomic()
 def update_src(path: str) -> None:
-    Source.delete().execute()
+    Source.clear()
     with open(path, "r", encoding="utf-8") as f:
         w = f.read().splitlines()
         for l in w:
@@ -319,11 +313,11 @@ def update_src(path: str) -> None:
             if l.startswith("#"):
                 continue
             name, path = l.split("|")
-            Source.create(name=name, path=path)
+            Source.add(name, path)
 
 
 def source_translate(path: str) -> str:
     parts = path.split("/")
     source = parts[0]
-    srcpath = Source.get(Source.name == source)
-    return str(Path(srcpath.path) / "/".join(parts[1:]))
+    srcpath = Source.get(source)
+    return str(Path(srcpath) / "/".join(parts[1:]))

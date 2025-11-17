@@ -53,7 +53,10 @@ async def handle_category() -> Any:
         {
             "name": cate.name,
             "color": cate.color,
-            "tags": [{"name": tag.name, "color": tag.color} for tag in cate.tags],
+            "tags": [
+                {"name": tag.name, "color": tag.color}
+                for tag in category.list_tag(cate.name)
+            ],
         }
         for cate in category.list_tag()
     ]
@@ -113,7 +116,7 @@ async def handle_tag_change(ids: list[int], adds: list[str], removes: list[str])
 
 
 async def handle_get_content(req: web.Request) -> web.FileResponse:
-    return web.FileResponse(tagfile.source_translate(req.query.get("path")))
+    return web.FileResponse(tagfile.source_translate(req.query.get("path") or ""))
 
 
 @webjson
@@ -326,7 +329,12 @@ def main():
         elif args.mode2 == "listtag":
             for cate in category.list_tag():
                 print("#" + cate.name)
-                print(" ".join(tagfmt(tag.name, args.color) for tag in cate.tags))
+                print(
+                    " ".join(
+                        tagfmt(tag.name, args.color)
+                        for tag in category.list_tag(cate.name)
+                    )
+                )
         elif args.mode2 == "setcolor":
             category.set_tag_color(args.name, args.color)
     else:

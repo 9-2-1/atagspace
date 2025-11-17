@@ -1,53 +1,37 @@
-from .db import Category, Tag, sqlite_db
+from .db import Category, Tag
 
 
 def list_category() -> list[Category]:
-    return list(Category.select())
+    return Category.list()
 
 
 def set_category(name: str, color: str | None) -> None:
-    cate, new = Category.get_or_create(name=name)
-    cate.color = color
-    cate.save()
+    Category.set(name, color)
 
 
 def rename_category(name: str, newname: str) -> None:
-    Category.update(name=newname).where(Category.name == name).execute()
+    Category.rename(name, newname)
 
 
-def list_tag() -> list[Category]:
-    return list(Category.select())
+def list_tag(cate: str | None = None) -> list[Tag]:
+    return Tag.list(cate)
 
 
 def set_tag(name: str, cate: str) -> None:
-    tag = Tag.get_or_none(name=name)
-    if tag is not None:
-        tag.cateid = Category.get(name=cate)
-        tag.save()
-    else:
-        Tag.create(name=name, cateid=Category.get(name=cate))
+    Tag.set(name, cate)
 
 
 def set_tag_color(name: str, color: str | None) -> None:
-    Tag.update(color=color).where(Tag.name == name).execute()
+    Tag.set_color(name, color)
 
 
-@sqlite_db.atomic()
 def remove_cate(name: str) -> None:
-    cate = Category.get(name=name)
-    Tag.delete().where(Tag.cateid == cate).execute()
-    cate.delete_instance()
+    Category.remove(name)
 
 
 def remove_tag(name: str) -> None:
-    Tag.delete().where(Tag.name == name).execute()
+    Tag.remove(name)
 
 
 def get_color(name: str) -> str | None:
-    tag = Tag.get_or_none(name=name)
-    if tag:
-        if tag.color is not None:
-            return tag.color
-        if tag.cateid.color is not None:
-            return tag.cateid.color
-    return Category.get(name="").color  # default
+    return Tag.get_color(name)
