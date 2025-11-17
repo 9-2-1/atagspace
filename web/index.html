@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh">
   <head>
     <script src="/ms-clarity.js"></script>
     <meta charset="UTF-8" />
@@ -19,19 +19,19 @@
       <div class="h-1 vsplit noselect">
         <div class="v-2 hsplit">
           <div class="h-0 vsplit">
-            <button id="home" class="v-0">home</button>
-            <button id="up" class="v-0">up</button>
+            <button id="home" class="v-0">根目录</button>
+            <button id="up" class="v-0">上一级</button>
             <input id="path" class="v-1" placeholder="root/path" />
-            <button id="go" class="v-0">go</button>
+            <button id="go" class="v-0">转到</button>
           </div>
           <div class="h-0 vsplit">
-            <span class="v-0">filter:</span>
+            <span class="v-0">筛选:</span>
             <input
               id="filter"
               class="v-1"
               placeholder="keyword *.txt +tag -tag **/path/**/*.ext"
             />
-            <button id="find" class="v-0">find</button>
+            <button id="find" class="v-0">查找</button>
           </div>
           <div id="filelist" class="h-1 hsplit hscroll border"></div>
         </div>
@@ -39,26 +39,26 @@
           <div class="h-3 hsplit">
             <div class="h-1 hsplit border">
               <div class="h-0 vlist">
-                <span class="v-0">category:</span>
-                <button id="category_create">create</button>
-                <button id="category_delete">delete</button>
-                <button id="category_rename">rename</button>
+                <span class="v-0">标签组:</span>
+                <button id="category_create">创建</button>
+                <button id="category_delete">删除</button>
+                <button id="category_rename">改名</button>
                 <input class="v-0" id="category_color_fg" type="color" />
                 <input class="v-0" id="category_color_bg" type="color" />
-                <button id="category_color">color</button>
-                <button id="category_clear">clear</button>
+                <button id="category_color">设定颜色</button>
+                <button id="category_clear">无色</button>
               </div>
               <div class="h-1" id="category"></div>
             </div>
             <div class="h-2 hsplit border">
               <div class="h-0 vlist">
-                <span class="v-0">tag:</span>
-                <button id="tag_add">add</button>
-                <button id="tag_remove">remove</button>
+                <span class="v-0">标签:</span>
+                <button id="tag_add">添加</button>
+                <button id="tag_remove">删除</button>
                 <input class="v-0" id="tag_color_fg" type="color" />
                 <input class="v-0" id="tag_color_bg" type="color" />
-                <button id="tag_color">color</button>
-                <button id="tag_clear">clear</button>
+                <button id="tag_color">设定颜色</button>
+                <button id="tag_clear">无色</button>
               </div>
               <div class="h-3" id="tags"></div>
             </div>
@@ -68,7 +68,7 @@
                 class="v-1"
                 placeholder="tag1 tag2 tag3 ..."
               />
-              <button id="tag_apply" class="v-0">apply</button>
+              <button id="tag_apply" class="v-0">应用</button>
             </div>
           </div>
           <iframe

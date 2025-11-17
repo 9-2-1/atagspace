@@ -2,11 +2,10 @@ from typing import Callable, Any, Awaitable
 import os
 import argparse
 import json
-from datetime import datetime
+from dataclasses import dataclass, is_dataclass, asdict as dataclass_asdict
 
 
 from aiohttp import web
-from peewee import Model
 
 from . import db
 from . import tagfile
@@ -14,10 +13,9 @@ from . import category
 
 
 def json_default(x: Any) -> Any:
-    if isinstance(x, Model):
-        return x.__data__
-    if isinstance(x, datetime):
-        return x.strftime("%Y-%m-%d %H:%M:%S%z")
+    if is_dataclass(x):
+        # TODO
+        return dataclass_asdict(x)  # type: ignore
     raise ValueError(f"{x!r} is not json serializable")
 
 
@@ -58,7 +56,7 @@ async def handle_category() -> Any:
                 for tag in category.list_tag(cate.name)
             ],
         }
-        for cate in category.list_tag()
+        for cate in category.list_category()
     ]
 
 

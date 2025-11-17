@@ -8,7 +8,7 @@ def check(file: "tagfile.ListFile|File", cache_only: bool = False) -> str | None
     if file.is_dir:
         return None
     realpath = tagfile.source_translate(file.path + "/" + file.name)
-    existing = Checksum.match(
+    existing = Checksum.reuse(
         size=file.size, mtime=file.mtime, path=realpath, dev=file.dev, ino=file.ino
     )
     if existing is not None:

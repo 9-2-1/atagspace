@@ -29,7 +29,11 @@ def tag_file(id_: int, tags: list[str]) -> None:
 
 def tag_file_change(id_: int, adds: list[str], removes: list[str]) -> None:
     tags = File.get_tag(id_)
-    tags = " ".join([x for x in tags.split(" ") + adds if x not in removes])
+    tagl = list(filter(lambda x: x != "", tags.split(" ")))
+    for tag in adds:
+        if tag not in tagl:
+            tagl.append(tag)
+    tags = " ".join([x for x in tagl if x not in removes])
     File.tag(id_, tags)
 
 

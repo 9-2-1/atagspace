@@ -81,7 +81,7 @@ class File:
             " deltime REAL)"
         )
         sqlite_db.execute(
-            "CREATE INDEX IF NOT EXISTS file_path_name ON file (path, name) WHERE deltime IS NULL"
+            "CREATE INDEX IF NOT EXISTS file_path_name ON file (path, name)"
         )
         sqlite_db.execute("CREATE INDEX IF NOT EXISTS file_dev_ino ON file (dev, ino)")
         sqlite_db.execute(
@@ -104,17 +104,21 @@ class File:
         return [
             File(*row)
             for row in sqlite_db.execute(
-                "SELECT * FROM file WHERE path = ? AND deltime IS NULL", (path,)
+                "SELECT * FROM file WHERE path = ? AND deltime IS NULL ORDER BY name", (path,)
             )
         ]
 
     @staticmethod
     def list_recurse(path: str) -> "list[File]":
+        if path == "":
+            path_glob = "*"
+        else:
+            path_glob = path + "/*"
         return [
             File(*row)
             for row in sqlite_db.execute(
-                "SELECT * FROM file WHERE (path == ?1 OR path GLOB (?1 + '/*')) AND deltime IS NULL",
-                (path,),
+                "SELECT * FROM file WHERE (path == ? OR path GLOB ?) AND deltime IS NULL ORDER BY name",
+                (path, path_glob),
             )
         ]
 
@@ -173,6 +177,8 @@ class File:
 
     @staticmethod
     def reuse_get_dev_ino(dev: int, ino: int) -> "File | None":
+        if ino == 0 or dev == 0:
+            return None
         row = sqlite_db.execute(
             "SELECT * FROM file WHERE dev = ? AND ino = ?", (dev, ino)
         ).fetchone()
@@ -224,7 +230,7 @@ class Checksum:
         )
         sqlite_db.execute("CREATE INDEX IF NOT EXISTS checksum_path ON checksum (path)")
         sqlite_db.execute(
-            "CREATE INDEX IF NOT EXISTS checksum_size_checksum ON checksum (size, checksum)"
+            "CREATE INDEX IF NOT EXISTS checksum_size_mtime ON checksum (size, mtime)"
         )
         sqlite_db.execute(
             "CREATE INDEX IF NOT EXISTS checksum_dev_ino ON checksum (dev, ino)"
@@ -242,14 +248,14 @@ class Checksum:
         sqlite_db.commit()
 
     @staticmethod
-    def match(
+    def reuse(
         size: int, mtime: float, path: str, dev: int, ino: int
     ) -> "Checksum | None":
         row = sqlite_db.execute(
             "SELECT * FROM checksum WHERE "
-            " (size = ? AND mtime = ?) AND"
-            " (path = ? OR (dev = ? AND ino = ?))",
-            (path, size, mtime, dev, ino),
+            " size = ? AND mtime = ? AND"
+            " (path = ? OR (dev = ? AND ino = ? AND dev != 0 AND ino != 0))",
+            (size, mtime, path, dev, ino),
         ).fetchone()
         return Checksum(*row) if row is not None else None
 
@@ -342,7 +348,7 @@ class Tag:
             " color TEXT,"
             " FOREIGN KEY (cate_id) REFERENCES Category(id))"
         )
-        sqlite_db.execute("CREATE INDEX IF NOT EXISTS tag_name ON tag (name)")
+        sqlite_db.execute("CREATE UNIQUE INDEX IF NOT EXISTS tag_name ON tag (name)")
         sqlite_db.execute("CREATE INDEX IF NOT EXISTS tag_cate_id ON tag (cate_id)")
 
     @staticmethod
@@ -398,8 +404,7 @@ def init() -> None:
     Tag.init()
     try:
         Category.get_id("")
-    except ValueError as err:
-        print(err)
+    except TypeError:
         Category.set("", "#c0c0c0|#ffffff")
 
 
