@@ -32,11 +32,11 @@ let api = {
     recurse?: boolean;
     limit?: number;
   }) => {
-    let ret: any = await _api("/list", param);
-    ret.forEach((item: any) => {
-      item.tags = item.tags.split(" ").filter((tag: string) => tag !== "");
-    });
-    return ret as APIlist;
+    let ret = await _api("/list", param);
+    return ret.map((item: any) => ({
+      ...item,
+      tags: item.tags.split(" ").filter((tag: string) => tag !== ""),
+    })) as APIlist;
   },
   category: () => _api("/category", {}) as Promise<APIcategory>,
   set_category: (param: { name: string; color: string | null }) =>

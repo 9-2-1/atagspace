@@ -24,17 +24,17 @@ class ListFile:
 
 
 def tag_file(id_: int, tags: list[str]) -> None:
-    File.tag(id_, " ".join(tags))
+    File.set_tags(id_, " ".join(tags))
 
 
 def tag_file_change(id_: int, adds: list[str], removes: list[str]) -> None:
-    tags = File.get_tag(id_)
+    tags = File.get_tags(id_)
     tagl = list(filter(lambda x: x != "", tags.split(" ")))
     for tag in adds:
         if tag not in tagl:
             tagl.append(tag)
     tags = " ".join([x for x in tagl if x not in removes])
-    File.tag(id_, tags)
+    File.set_tags(id_, tags)
 
 
 def arglist(x: str) -> list[str]:

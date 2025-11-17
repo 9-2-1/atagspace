@@ -1,6 +1,3 @@
-/139:
-/aliyun:
-/baidu:
-/qbit:
-/quark:
-/xunlei:
+0.任务 XX 6.XXXXX /dest/任务/{0.任务}/{1.兴趣}
+0.任务 1.兴趣 /dest/任务/{0.任务}/{1.兴趣}
+0.任务 /dest/任务/{0.任务}

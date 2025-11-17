@@ -89,12 +89,12 @@ class File:
         )
 
     @staticmethod
-    def tag(id_: int, tags: str) -> None:
+    def set_tags(id_: int, tags: str) -> None:
         sqlite_db.execute("UPDATE file SET tags = ? WHERE id = ?", (tags, id_))
         sqlite_db.commit()
 
     @staticmethod
-    def get_tag(id_: int) -> str:
+    def get_tags(id_: int) -> str:
         return sqlite_db.execute(
             "SELECT tags FROM file WHERE id = ?", (id_,)
         ).fetchone()[0]
@@ -104,7 +104,8 @@ class File:
         return [
             File(*row)
             for row in sqlite_db.execute(
-                "SELECT * FROM file WHERE path = ? AND deltime IS NULL ORDER BY name", (path,)
+                "SELECT * FROM file WHERE path = ? AND deltime IS NULL ORDER BY name",
+                (path,),
             )
         ]
 
@@ -382,6 +383,16 @@ class Tag:
     def remove(name: str) -> None:
         sqlite_db.execute("DELETE FROM tag WHERE name = ?", (name,))
         sqlite_db.commit()
+
+    @staticmethod
+    def get_category_name(name: str) -> str | None:
+        query = sqlite_db.execute(
+            "SELECT c.name FROM tag AS t JOIN category AS c ON t.cate_id = c.id WHERE t.name = ?",
+            (name,),
+        ).fetchone()
+        if query is None:
+            return None
+        return query[0]
 
     @staticmethod
     def get_color(name: str) -> str:

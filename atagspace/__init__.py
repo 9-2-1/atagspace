@@ -1,4 +1,5 @@
-from .__main__ import app, main
+from .__main__ import main
+from .web import app
 
 app = app
 main = main

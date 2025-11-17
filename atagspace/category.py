@@ -33,5 +33,9 @@ def remove_tag(name: str) -> None:
     Tag.remove(name)
 
 
+def get_category_name(name: str) -> str | None:
+    return Tag.get_category_name(name)
+
+
 def get_color(name: str) -> str | None:
     return Tag.get_color(name)

@@ -8,6 +8,10 @@ import logging
 import sqlite3
 from typing import cast, Optional
 
+from .. import checker
+from ..db import File, sqlite_db
+from .. import tagfile
+
 
 log = logging.getLogger(__name__)
 
@@ -58,7 +62,10 @@ def name_by(orig: Path, title: str, url: str, tag: str, date: datetime) -> str:
         n_title = n_title.replace(c, "")
         n_url = n_url.replace(c, "")
         n_host_rev = n_host_rev.replace(c, "")
-    name = f"{n_host_rev}【{n_title}】{n_date}〖{n_url}〗{tag}{n_exten}"
+    n_tag = ""
+    if tag != "":
+        n_tag = f"[{tag}]"
+    name = f"{n_host_rev}【{n_title}】{n_date}〖{n_url}〗{n_tag}{n_exten}"
     return name
 
 
@@ -147,35 +154,45 @@ def parse_file(file: Path) -> Optional[tuple[str, str, datetime]]:
     return None
 
 
-class SingleFileRenameCached:
-    def __init__(self) -> None:
-        self.db = sqlite3.connect("singlefilerename.db")
-        self.db.execute(
-            "create table if not exists singlefile (path text primary key, title text, url text, date text) without rowid"
+def init() -> None:
+    sqlite_db.execute(
+        "CREATE TABLE IF NOT EXISTS singlefile (id INTEGER PRIMARY KEY, checksum TEXT, title TEXT, url TEXT, date TEXT, lasttime REAL)"
+    )
+    sqlite_db.execute(
+        "CREATE INDEX IF NOT EXISTS singlefile_checksum ON singlefile (checksum)"
+    )
+    sqlite_db.commit()
+
+
+def parse_file_cached(file: File) -> Optional[tuple[str, str, datetime]]:
+    checksum = checker.check(file)
+    row = sqlite_db.execute(
+        "SELECT title, url, date FROM singlefile WHERE checksum = ?", (checksum,)
+    ).fetchone()
+    if row:
+        title, url, date = row
+        date = datetime.strptime(date, "%Y-%m-%d %H:%M:%S %z")
+        return title, url, date
+    info = parse_file(Path(tagfile.source_translate(file.path + "/" + file.name)))
+    if info:
+        sqlite_db.execute(
+            "INSERT OR REPLACE INTO singlefile (checksum, title, url, date) VALUES (?, ?, ?, ?)",
+            (checksum, info[0], info[1], info[2].strftime("%Y-%m-%d %H:%M:%S %z")),
         )
-        self.db.commit()
+        sqlite_db.commit()
+    return info
 
-    def parse_file(self, file: Path) -> Optional[tuple[str, str, datetime]]:
-        row = self.db.execute(
-            "select title, url, date from singlefile where path=?", (str(file),)
-        ).fetchone()
-        if row:
-            title, url, date = row
-            date = datetime.strptime(date, "%Y-%m-%d %H:%M:%S %z")
-            return title, url, date
-        info = parse_file(file)
-        if info:
-            self.db.execute(
-                "insert or replace into singlefile (path, title, url, date) values (?, ?, ?, ?)",
-                (str(file), info[0], info[1], info[2].strftime("%Y-%m-%d %H:%M:%S %z")),
-            )
-            self.db.commit()
-        return info
 
-    def check_rename(self, file: Path, tag: str) -> Optional[str]:
-        info = self.parse_file(file)
-        if info:
-            title, url, date = info
-            newname = name_by(file, title, url, tag, date)
-            return newname
-        return None
+def check_rename(file: File) -> Optional[str]:
+    info = parse_file_cached(file)
+    if info:
+        title, url, date = info
+        newname = name_by(
+            Path(tagfile.source_translate(file.path + "/" + file.name)),
+            title,
+            url,
+            file.tags,
+            date,
+        )
+        return newname
+    return None

@@ -16,7 +16,7 @@ class CheckElem<NAME> {
         this.data.change(this.name);
       }
       if (this.group !== null && this.groupindex !== null) {
-        const oldfocused = this.group.focused
+        const oldfocused = this.group.focused;
         if (e.shiftKey && oldfocused != this.groupindex) {
           this._extendcheck();
         }

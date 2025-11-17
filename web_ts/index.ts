@@ -55,7 +55,7 @@ class App {
     this.ele.tag_color,
     this.ele.tag_clear,
   );
-  lastMode: "go"|"find" = "go"
+  lastMode: "go" | "find" = "go";
 
   constructor() {
     this._setupNavigate();
@@ -84,11 +84,11 @@ class App {
       await this.fileLoadAPI();
     };
     this.ele.go.onclick = () => {
-      this.lastMode = "go"
+      this.lastMode = "go";
       this._reload();
     };
     this.ele.find.onclick = () => {
-      this.lastMode = "find"
+      this.lastMode = "find";
       this._reload(true);
     };
   }
@@ -321,7 +321,7 @@ class App {
         return;
       }
       let name = old_cate.name;
-      let newname = prompt("New category name");
+      let newname = prompt("New category name", name);
       if (newname === null) {
         return;
       }
@@ -374,9 +374,7 @@ class App {
       this.tagCheckData.reset();
     };
     this.tagCheckGroup.onfocus = (elem) => {
-      this.tagColorSet.set(
-        this.colorindex.get(elem.name) ?? "#c0c0c0|#ffffff",
-      );
+      this.tagColorSet.set(this.colorindex.get(elem.name) ?? "#c0c0c0|#ffffff");
     };
     this.tagColorSet.onSet = async (color) => {
       let tags = [...this.tagCheckData.select.keys()];
@@ -486,7 +484,10 @@ class App {
           this.colorindex.set(tag.name, tag.color ?? catecolor);
         });
         this.cateindex.set(cate.name, cate);
+        this.categoryCheckData.default_.set(cate.name, 1);
       });
+    this.categoryCheckData.reset();
+    this.tagsLoad();
     this.tagColorReload();
   }
 
@@ -535,27 +536,27 @@ class App {
     const path = this.ele_path.value;
     const filter = this.ele_filter.value;
     const mode = this.lastMode;
-    
+
     if (path) {
-      params.set('path', path);
+      params.set("path", path);
     }
     if (filter) {
-      params.set('filter', filter);
+      params.set("filter", filter);
     }
     if (mode) {
-      params.set('mode', mode);
+      params.set("mode", mode);
     }
-    
+
     const newURL = `${window.location.pathname}?${params.toString()}`;
-    window.history.replaceState({}, '', newURL);
+    window.history.replaceState({}, "", newURL);
   }
 
   _loadStateFromURL() {
     const params = new URLSearchParams(window.location.search);
-    const path = params.get('path');
-    const filter = params.get('filter');
-    const mode = params.get('mode');
-    
+    const path = params.get("path");
+    const filter = params.get("filter");
+    const mode = params.get("mode");
+
     if (path !== null) {
       this.ele_path.value = path;
     }
