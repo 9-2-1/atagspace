@@ -149,17 +149,17 @@ def main():
     )
 
     args = parser.parse_args()
+    db.init()
     if args.mode == "web":
         web.run_app(app, host="127.0.0.1", port=4590)
     elif args.mode == "db":
         if args.mode2 == "init":
-            db.init()
-            db.close()
+            # the db is initialized whether command run
+            pass
         else:
             subparser_db.print_help()
     elif args.mode == "tagfile":
         if args.mode2 == "listfile":
-            db.init()
             ret = tagfile.list_file(args.path, args.filter, args.recurse, args.limits)
             for file in ret:
                 if file.path != "":
@@ -180,31 +180,20 @@ def main():
                         if tag != ""
                     )
                 )
-            db.close()
         elif args.mode2 == "updatenew":
-            db.init()
             tagfile.update_new(full=args.full)
-            db.close()
         elif args.mode2 == "updatesrc":
-            db.init()
             tagfile.update_src(args.file)
-            db.close()
         elif args.mode2 == "tagset":
-            db.init()
             tagfile.tag_file(args.fid, args.tags)
-            db.close()
         elif args.mode2 == "tagchange":
-            db.init()
             tagfile.tag_file_change(
                 args.fid,
                 list(filter(lambda x: x != "", args.adds.split(" "))),
                 list(filter(lambda x: x != "", args.removes.split(" "))),
             )
-            db.close()
         elif args.mode2 == "pathtrans":
-            db.init()
             print(tagfile.source_translate(args.file))
-            db.close()
         else:
             subparser_tagfile.print_help()
     elif args.mode == "category":
@@ -248,6 +237,7 @@ def main():
             print(f"导出完成 {export_count} 个文件")
     else:
         parser.print_help()
+    db.close()
 
 
 if __name__ == "__main__":

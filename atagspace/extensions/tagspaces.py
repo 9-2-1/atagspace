@@ -6,7 +6,6 @@
 # and that's it!
 
 import traceback
-import os
 import re
 from pathlib import Path
 import logging
@@ -53,7 +52,7 @@ def tagspaces_tags(file: Path) -> tuple[str, list[str]]:
 
 def tagspaces_tags_apply(realname: str, tags: list[str]) -> str:
     if len(tags) > 0:
-        pattern = re.match(r"^(.*?)((?:\.[0-9a-zA-Z_]{1,5}){,3})$", realname)
+        pattern = re.match(r"^(.*?)((?:\.[0-9a-zA-Z_]{1,5})?)$", realname)
         if not tags:
             return realname
         assert pattern is not None
@@ -108,6 +107,8 @@ BLOCKLIST: set[str] = set(("●", "◆", NOMOVE))
 
 def tagspaces_export(path: str, dry_run: bool = False, singlefile: bool = False) -> int:
     finish_count = 0
+    if singlefile:
+        singlefilerename.init()
 
     def walk(path: str, nomove: bool = False) -> None:
         nonlocal finish_count

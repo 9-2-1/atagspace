@@ -26,6 +26,10 @@ const elename = [
   "preview",
 ] as const;
 
+function compare(a: string, b: string) {
+  return a > b ? 1 : a < b ? -1 : 0;
+}
+
 class App {
   ele: { [key in (typeof elename)[number]]: HTMLElement } = byids(elename);
   ele_path = this.ele.path as HTMLInputElement;
@@ -469,7 +473,7 @@ class App {
     let focused = this.categoryCheckGroup.focusedElem()?.name;
     this.categoryCheckGroup.clear();
     category
-      .sort((a, b) => a.name.localeCompare(b.name))
+      .sort((a, b) => compare(a.name, b.name))
       .forEach((cate) => {
         const name = cate.name;
         const categoryCheck = new CheckElem(
@@ -503,7 +507,7 @@ class App {
         return;
       }
       cate.tags
-        .sort((a, b) => a.name.localeCompare(b.name))
+        .sort((a, b) => compare(a.name, b.name))
         .forEach((tag) => {
           const tagCheck = new CheckElem(
             tag.name,

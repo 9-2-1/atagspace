@@ -1,12 +1,11 @@
-import re
 from pathlib import Path
-import html
 from datetime import datetime, timezone, timedelta
-
-datetime_parse = datetime.fromisoformat
+from typing import Optional
+import re
+import html
 import logging
-import sqlite3
-from typing import cast, Optional
+
+from dateparser import parse as datetime_parse
 
 from .. import checker
 from ..db import File, sqlite_db
@@ -113,7 +112,8 @@ def parse_html(file: Path) -> tuple[str, str, datetime]:
             singlefile_dict[key] = value
         title = title
         url = singlefile_dict["url"]
-        date = cast(list[datetime], datetime_parse(singlefile_dict["saved date"]))[0]
+        date = datetime_parse(singlefile_dict["saved date"])
+        assert date is not None
     return title, url, date
 
 
@@ -136,7 +136,8 @@ def parse_mhtml(file: Path) -> tuple[str, str, datetime]:
                 singlefile_dict[key] += value
         title = title_parse(singlefile_dict["Subject"])
         url = singlefile_dict["Snapshot-Content-Location"]
-        date = cast(list[datetime], datetime_parse(singlefile_dict["Date"]))[0]
+        date = datetime_parse(singlefile_dict["saved date"])
+        assert date is not None
     return title, url, date
 
 
@@ -184,6 +185,8 @@ def parse_file_cached(file: File) -> Optional[tuple[str, str, datetime]]:
 
 
 def check_rename(file: File) -> Optional[str]:
+    if file.is_dir:
+        return None
     info = parse_file_cached(file)
     if info:
         title, url, date = info
