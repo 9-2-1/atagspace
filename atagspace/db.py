@@ -1,4 +1,5 @@
 import sqlite3
+import glob
 import time
 from dataclasses import dataclass
 
@@ -114,7 +115,7 @@ class File:
         if path == "":
             path_glob = "*"
         else:
-            path_glob = path + "/*"
+            path_glob = glob.escape(path + "/") + "*"
         return [
             File(*row)
             for row in sqlite_db.execute(
@@ -202,6 +203,25 @@ class File:
             "SELECT * FROM file WHERE size = ? AND checksum = ?", (size, checksum)
         ).fetchone()
         return File(*row) if row is not None else None
+
+    @staticmethod
+    # TODO: fix subitem path
+    def set_name(id_: int, name: str) -> None:
+        with sqlite_db:
+            path, old_name = sqlite_db.execute(
+                "SELECT path, name FROM file WHERE id = ?", (id_,)
+            ).fetchone()
+            new_path = (path + "/" if path != "" else "") + name
+            old_path = (path + "/" if path != "" else "") + old_name
+            sqlite_db.execute("UPDATE file SET name = ? WHERE id = ?", (name, id_))
+            sqlite_db.execute(
+                "UPDATE file SET path = ?2 WHERE path == ?1", (old_path, new_path)
+            )
+            sqlite_db.execute(
+                "UPDATE file SET path = ?2 + '/' + SUBSTR(path, ?3 + 1) WHERE path GLOB ?1",
+                (glob.escape(old_path + "/") + "*", new_path, len(old_path + "/")),
+            )
+        sqlite_db.commit()
 
 
 # checksum

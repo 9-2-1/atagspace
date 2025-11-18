@@ -6,6 +6,7 @@
 # and that's it!
 
 import traceback
+import os
 import re
 from pathlib import Path
 import logging
@@ -15,9 +16,10 @@ log = logging.getLogger(__name__)
 
 from ..db import File
 from .. import tagfile
+from . import singlefilerename
 
 
-def tagspaces_tags(file: Path) -> list[str]:
+def tagspaces_tags(file: Path) -> tuple[str, list[str]]:
     name = file.name
     realname = file.name
     tags: list[str] = []
@@ -46,7 +48,22 @@ def tagspaces_tags(file: Path) -> list[str]:
             traceback.print_exc()
 
     tags = [tag.strip() for tag in tags if tag.strip() != ""]
-    return tags
+    return realname, tags
+
+
+def tagspaces_tags_apply(realname: str, tags: list[str]) -> str:
+    if len(tags) > 0:
+        pattern = re.match(r"^(.*?)((?:\.[0-9a-zA-Z_]{1,5}){,3})$", realname)
+        if not tags:
+            return realname
+        assert pattern is not None
+        name, suffix = pattern.groups()
+        pattern2 = re.match(r".*\[.*\]", name)
+        if pattern2 is not None:
+            return "[" + " ".join(tags) + "]" + name + suffix
+        return name + "[" + " ".join(tags) + "]" + suffix
+    else:
+        return realname
 
 
 def tag_has(file: File, tag: str) -> bool:
@@ -70,7 +87,7 @@ def tagspaces_import(path: str) -> int:
             path = tagfile.source_translate(
                 (file.path + "/" if file.path != "" else "") + file.name
             )
-            tags = tagspaces_tags(Path(path))
+            realname, tags = tagspaces_tags(Path(path))
             tag_new = False
             for tag in tags:
                 if not tag_has(file, tag):
@@ -80,6 +97,55 @@ def tagspaces_import(path: str) -> int:
                 finish_count += 1
             if file.is_dir:
                 walk((file.path + "/" if file.path != "" else "") + file.name)
+
+    walk(path)
+    return finish_count
+
+
+NOMOVE = "!不改名"
+BLOCKLIST: set[str] = set(("●", "◆", NOMOVE))
+
+
+def tagspaces_export(path: str, dry_run: bool = False, singlefile: bool = False) -> int:
+    finish_count = 0
+
+    def walk(path: str, nomove: bool = False) -> None:
+        nonlocal finish_count
+        for file in tagfile.list_file(path, ""):
+            if file.is_dir:
+                hasnomove = NOMOVE in file.tags.split(" ")
+                walk(
+                    (file.path + "/" if file.path != "" else "") + file.name,
+                    nomove or hasnomove,
+                )
+            fpath = Path(
+                tagfile.source_translate(
+                    (file.path + "/" if file.path != "" else "") + file.name
+                )
+            )
+            new_tags = file.tags.split(" ")
+            new_tags = [tag for tag in new_tags if tag not in BLOCKLIST and tag != ""]
+            if nomove:
+                pass
+                # TODO .ts/xxx.json
+            else:
+                newname = None
+                if singlefile:
+                    newname = singlefilerename.check_rename(file)
+                if newname is None:
+                    realname, tags = tagspaces_tags(fpath)
+                    newname = tagspaces_tags_apply(realname, new_tags)
+                if newname != file.name:
+                    if dry_run:
+                        print(f"would rename {fpath} to {newname}")
+                    else:
+                        try:
+                            fpath.rename(fpath.with_name(newname))
+                            tagfile.file_rename(file.id, newname)
+                        except Exception:
+                            log.warning(f"failed to rename {fpath} to {newname}")
+                            traceback.print_exc()
+                    finish_count += 1
 
     walk(path)
     return finish_count

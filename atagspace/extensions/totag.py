@@ -18,7 +18,16 @@ def tag_set(file: File, tag: str, set_: bool = True):
             tagfile.tag_file_change(file.id, adds=[], removes=[tag])
 
 
-def totag(path: str, markall: bool = False) -> tuple[int, int]:
+def cleartag(path: str):
+    for file in tagfile.list_file(path, ""):
+        tagfile.tag_file(file.id, [])
+        if file.is_dir:
+            cleartag((file.path + "/" if file.path != "" else "") + file.name)
+
+
+def totag(
+    path: str, markall: bool = False, clear_file_tags: bool = False
+) -> tuple[int, int]:
     todo_count = 0
     finish_count = 0
 
@@ -32,6 +41,11 @@ def totag(path: str, markall: bool = False) -> tuple[int, int]:
                 if set_tag:
                     sum_tag = True
             else:
+                if file.is_dir and tag_has(file, TAG_AS_FILE):
+                    if clear_file_tags:
+                        cleartag(
+                            (file.path + "/" if file.path != "" else "") + file.name
+                        )
                 if markall:
                     tag_set(file, TAG_TODO)
                     todo_count += 1

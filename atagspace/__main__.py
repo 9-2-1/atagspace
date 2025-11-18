@@ -1,8 +1,7 @@
 import argparse
-
+import logging
 
 from aiohttp import web
-
 from . import db
 from . import tagfile
 from . import category
@@ -10,6 +9,9 @@ from .extensions import totag
 from .extensions import sorttag
 from .extensions import tagspaces
 from .web import app
+
+
+logging.basicConfig(level=logging.INFO)
 
 
 tagfmt_errors: set[str] = set()
@@ -125,16 +127,26 @@ def main():
     subparser_extension_totag = subparser_extension_.add_parser(
         "totag", help="同步待分类标记"
     )
-    subparser_extension_totag.add_argument("path")
+    subparser_extension_totag.add_argument("path", nargs="?", default="")
     subparser_extension_totag.add_argument("-m", "--markall", action="store_true")
     subparser_extension_sorttag = subparser_extension_.add_parser(
         "sorttag", help="排序标记"
     )
-    subparser_extension_sorttag.add_argument("path")
+    subparser_extension_sorttag.add_argument("path", nargs="?", default="")
     subparser_extension_tagspaces = subparser_extension_.add_parser(
         "tagspaces", help="从 tagspaces 导入标记"
     )
-    subparser_extension_tagspaces.add_argument("path")
+    subparser_extension_tagspaces.add_argument("path", nargs="?", default="")
+    subparser_extension_tagspaces_export = subparser_extension_.add_parser(
+        "tagspaces_export", help="从 tagspaces 导出标记"
+    )
+    subparser_extension_tagspaces_export.add_argument("path", nargs="?", default="")
+    subparser_extension_tagspaces_export.add_argument(
+        "-d", "--dry-run", action="store_true"
+    )
+    subparser_extension_tagspaces_export.add_argument(
+        "-s", "--singlefile", action="store_true"
+    )
 
     args = parser.parse_args()
     if args.mode == "web":
@@ -229,6 +241,11 @@ def main():
         elif args.mode2 == "tagspaces":
             import_count = tagspaces.tagspaces_import(args.path)
             print(f"导入完成 {import_count} 个文件")
+        elif args.mode2 == "tagspaces_export":
+            export_count = tagspaces.tagspaces_export(
+                args.path, args.dry_run, args.singlefile
+            )
+            print(f"导出完成 {export_count} 个文件")
     else:
         parser.print_help()
 

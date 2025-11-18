@@ -135,6 +135,7 @@ class App {
       // No file selected.
       this.fileCheckMode = 0;
       this.ele_tagsinput.placeholder = "";
+      this.ele.tag_apply.innerText = "添加";
     } else if (checked.size === 1) {
       // Single files selected.
       this.fileCheckMode = 1;
@@ -147,6 +148,7 @@ class App {
       });
       this.ele_tagsinput.value = file.tags.join(" ");
       this.ele_tagsinput.placeholder = "tag1 tag2 tag3 ...";
+      this.ele.tag_apply.innerText = "修改";
     } else {
       // Multiple files selected.
       this._fileTagInitMulti(checked);
@@ -188,6 +190,7 @@ class App {
       this.tagCheckData.default_.set(tag, 1);
     });
     this.ele_tagsinput.placeholder = "+tag1 +tag2 -tag3 -tag4 ...";
+    this.ele.tag_apply.innerText = "修改";
   }
   _setupTagSelect() {
     this.tagCheckData.oninvoke = async (elem: CheckElem<string>) => {
@@ -235,7 +238,17 @@ class App {
     };
     this.ele.tag_apply.onclick = async () => {
       if (this.fileCheckMode === 0) {
-        // Do nothing
+        let cate = this.categoryCheckGroup.focusedElem();
+        if (cate !== null) {
+          let tags = this.ele_tagsinput.value
+            .split(" ")
+            .filter((tag: string) => tag !== "");
+          if (tags.length > 0) {
+            await api.set_tags({ tags: tags, cate: cate.name });
+            await this.categoryLoadAPI();
+            this.tagsLoad();
+          }
+        }
       } else if (this.fileCheckMode === 1) {
         const file = this.fileindex.get(
           this.fileCheckData.select.keys().next().value!,
@@ -246,20 +259,6 @@ class App {
         file.tags = this.ele_tagsinput.value
           .split(" ")
           .filter((tag: string) => tag !== "");
-        let cate = this.categoryCheckGroup.focusedElem();
-        if (cate !== null) {
-          let newtags: Array<string> = [];
-          file.tags.forEach((tag) => {
-            if (!this.colorindex.has(tag)) {
-              newtags.push(tag);
-            }
-          });
-          if (newtags.length > 0) {
-            await api.set_tags({ tags: newtags, cate: cate.name });
-            await this.categoryLoadAPI();
-            this.tagsLoad();
-          }
-        }
         await api.tag_file({ ids: [file.id], tags: file.tags });
         await this.fileLoadAPI();
         this._fileTagInit();
@@ -361,7 +360,6 @@ class App {
       await api.set_tags({ tags, cate });
       await this.categoryLoadAPI();
       this.tagsLoad();
-      this.tagCheckData.reset();
     };
     this.ele.tag_remove.onclick = async () => {
       let tags = [...this.tagCheckData.select.keys()];
@@ -371,7 +369,6 @@ class App {
       await api.remove_tags({ tags });
       await this.categoryLoadAPI();
       this.tagsLoad();
-      this.tagCheckData.reset();
     };
     this.tagCheckGroup.onfocus = (elem) => {
       this.tagColorSet.set(this.colorindex.get(elem.name) ?? "#c0c0c0|#ffffff");
@@ -396,6 +393,8 @@ class App {
 
   async _reload(recurse: boolean = false) {
     await this.categoryLoadAPI();
+    this.categoryCheckData.reset();
+    this.tagsLoad();
     this.fileCheckClear();
     await this.fileLoadAPI(recurse);
     this._updateURLState();
@@ -466,6 +465,8 @@ class App {
     this.category = category;
     this.cateindex.clear();
     this.colorindex.clear();
+    // preserve focus
+    let focused = this.categoryCheckGroup.focusedElem()?.name;
     this.categoryCheckGroup.clear();
     category
       .sort((a, b) => a.name.localeCompare(b.name))
@@ -485,8 +486,10 @@ class App {
         });
         this.cateindex.set(cate.name, cate);
         this.categoryCheckData.default_.set(cate.name, 1);
+        if (cate.name === focused) {
+          this.categoryCheckGroup.focus(categoryCheck);
+        }
       });
-    this.categoryCheckData.reset();
     this.tagsLoad();
     this.tagColorReload();
   }
@@ -495,7 +498,10 @@ class App {
     this.ele.tags.innerHTML = ""; // TODO safer clean
     this.tagCheckGroup.clear();
     [...this.categoryCheckData.select.keys()].reverse().forEach((catename) => {
-      const cate = this.cateindex.get(catename)!;
+      const cate = this.cateindex.get(catename);
+      if (cate === undefined) {
+        return;
+      }
       cate.tags
         .sort((a, b) => a.name.localeCompare(b.name))
         .forEach((tag) => {

@@ -110,6 +110,10 @@ def i64(x: int) -> int:
     return x
 
 
+def file_rename(id_: int, name: str) -> None:
+    File.set_name(id_, name)
+
+
 def update_new(full: bool = False) -> None:
     # 1.update deltime
     File.mark_all_delete()
