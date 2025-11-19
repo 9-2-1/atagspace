@@ -51,7 +51,7 @@ class App {
     this.ele.category_color,
     this.ele.category_clear,
   );
-  tagCheckData = new CheckData<string>(true, false);
+  tagCheckData = new CheckData<string>(true, true);
   tagCheckGroup = new CheckGroup<string>();
   tagColorSet = new ColorSet(
     this.ele.tag_color_fg as HTMLInputElement,
