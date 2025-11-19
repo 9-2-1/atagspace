@@ -169,10 +169,13 @@ def init() -> None:
 def parse_file_cached(file: File) -> Optional[tuple[str, str, datetime]]:
     checksum = checker.check(file)
     row = sqlite_db.execute(
-        "SELECT title, url, date FROM singlefile WHERE checksum = ?", (checksum,)
+        "SELECT id, title, url, date FROM singlefile WHERE checksum = ?", (checksum,)
     ).fetchone()
-    if row:
-        title, url, date = row
+    if row is not None:
+        id, title, url, date = row
+        sqlite_db.execute(
+            "UPDATE singlefile SET lasttime = ? WHERE id = ?", (time.time(), id)
+        )
         date = datetime.strptime(date, "%Y-%m-%d %H:%M:%S %z")
         return title, url, date
     info = parse_file(Path(tagfile.source_translate(file.path + "/" + file.name)))
