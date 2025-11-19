@@ -17,24 +17,6 @@
   <body>
     <div class="screen hsplit">
       <div class="h-1 vsplit noselect">
-        <div class="v-2 hsplit">
-          <div class="h-0 vsplit">
-            <button id="home" class="v-0">根目录</button>
-            <button id="up" class="v-0">上一级</button>
-            <input id="path" class="v-1" placeholder="root/path" />
-            <button id="go" class="v-0">转到</button>
-          </div>
-          <div class="h-0 vsplit">
-            <span class="v-0">筛选:</span>
-            <input
-              id="filter"
-              class="v-1"
-              placeholder="keyword *.txt +tag -tag **/path/**/*.ext"
-            />
-            <button id="find" class="v-0">查找</button>
-          </div>
-          <div id="filelist" class="h-1 hsplit hscroll border"></div>
-        </div>
         <div class="v-1 hsplit">
           <div class="h-3 hsplit">
             <div class="h-1 hsplit border">
@@ -77,6 +59,24 @@
             sandbox="allow-scripts"
             src="about:blank"
           />
+        </div>
+        <div class="v-2 hsplit">
+          <div class="h-0 vsplit">
+            <button id="home" class="v-0">根目录</button>
+            <button id="up" class="v-0">上一级</button>
+            <input id="path" class="v-1" placeholder="root/path" />
+            <button id="go" class="v-0">转到</button>
+          </div>
+          <div class="h-0 vsplit">
+            <span class="v-0">筛选:</span>
+            <input
+              id="filter"
+              class="v-1"
+              placeholder="keyword *.txt +tag -tag **/path/**/*.ext"
+            />
+            <button id="find" class="v-0">查找</button>
+          </div>
+          <div id="filelist" class="h-1 hsplit hscroll border"></div>
         </div>
       </div>
     </div>
