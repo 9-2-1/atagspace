@@ -27,7 +27,7 @@ def B2Q(uchar: str) -> str:
     return chr(inside_code)
 
 
-def name_by(orig: Path, title: str, url: str, tag: str, date: datetime) -> str:
+def name_by(orig: Path, title: str, url: str, tag: list[str], date: datetime) -> str:
     n_exten = orig.suffix
     date = date.astimezone(timezone(timedelta(hours=8)))
     n_date = date.strftime("%Y%m%d-%H%M%S")
@@ -62,8 +62,8 @@ def name_by(orig: Path, title: str, url: str, tag: str, date: datetime) -> str:
         n_url = n_url.replace(c, "")
         n_host_rev = n_host_rev.replace(c, "")
     n_tag = ""
-    if tag != "":
-        n_tag = f"[{tag}]"
+    if len(tag) != 0:
+        n_tag = "[" + " ".join(tag) + "]"
     name = f"{n_host_rev}【{n_title}】{n_date}〖{n_url}〗{n_tag}{n_exten}"
     return name
 
@@ -123,20 +123,20 @@ def parse_mhtml(file: Path) -> tuple[str, str, datetime]:
         header_end = "\n\n"
         header_right = header.index(header_end, 0)
         header = header[0:header_right]
-        singlefile_dict = {}
+        mhtml_dict = {}
         key = ""
         for line in header.split("\n"):
             if ":" in line:
                 key, value = line.split(":", 1)
                 key = key.strip()
                 value = value.strip()
-                singlefile_dict[key] = value
+                mhtml_dict[key] = value
             else:
                 value = line.strip()
-                singlefile_dict[key] += value
-        title = title_parse(singlefile_dict["Subject"])
-        url = singlefile_dict["Snapshot-Content-Location"]
-        date = datetime_parse(singlefile_dict["saved date"])
+                mhtml_dict[key] += value
+        title = title_parse(mhtml_dict["Subject"])
+        url = mhtml_dict["Snapshot-Content-Location"]
+        date = datetime_parse(mhtml_dict["Date"])
         assert date is not None
     return title, url, date
 
@@ -184,7 +184,7 @@ def parse_file_cached(file: File) -> Optional[tuple[str, str, datetime]]:
     return info
 
 
-def check_rename(file: File) -> Optional[str]:
+def check_rename(file: File, tags: list[str]) -> Optional[str]:
     if file.is_dir:
         return None
     info = parse_file_cached(file)
@@ -194,7 +194,7 @@ def check_rename(file: File) -> Optional[str]:
             Path(tagfile.source_translate(file.path + "/" + file.name)),
             title,
             url,
-            file.tags,
+            tags,
             date,
         )
         return newname

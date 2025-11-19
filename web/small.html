@@ -16,8 +16,8 @@
   </head>
   <body>
     <div class="screen hsplit">
-      <div class="h-1 vsplit noselect">
-        <div class="v-2 hsplit">
+      <div class="h-1 hsplit noselect">
+        <div class="h-1 hsplit">
           <div class="h-0 vsplit">
             <button id="home" class="v-0">根目录</button>
             <button id="up" class="v-0">上一级</button>
@@ -35,8 +35,8 @@
           </div>
           <div id="filelist" class="h-1 hsplit hscroll border"></div>
         </div>
-        <div class="v-1 hsplit">
-          <div class="h-3 hsplit">
+        <div class="h-1 hsplit">
+          <div class="h-1 hsplit">
             <div class="h-1 hsplit border">
               <div class="h-0 vlist">
                 <span class="v-0">标签组:</span>
@@ -50,7 +50,7 @@
               </div>
               <div class="h-1" id="category"></div>
             </div>
-            <div class="h-2 hsplit border">
+            <div class="h-1 hsplit border">
               <div class="h-0 vlist">
                 <span class="v-0">标签:</span>
                 <button id="tag_add">添加</button>
@@ -73,7 +73,7 @@
           </div>
           <iframe
             id="preview"
-            class="v-2 border"
+            class="hidden v-2 border"
             sandbox="allow-scripts"
             src="about:blank"
           />

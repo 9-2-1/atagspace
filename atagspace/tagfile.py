@@ -97,7 +97,7 @@ def list_file(
     else:
         files = File.list(path)
     files = [file for file in files if apply_filter(filter_, file)]
-    if recurse and limit == 0:
+    if not recurse or limit == 0:
         return files
     files = files[:limit]
     return files
@@ -122,7 +122,6 @@ def update_new(full: bool = False) -> None:
     with alive_bar(title="List") as bar:
 
         def perfile(path: str, f: Path, is_dir: bool) -> None:
-            bar.text(path + "/" + f.name)
             try:
                 stat = f.lstat()
                 filelist.append(
@@ -157,6 +156,7 @@ def update_new(full: bool = False) -> None:
             for p, ds, fs in root.walk():
                 rela = p.relative_to(root)
                 path = "/".join([source.name, *rela.parts])
+                bar.text(path)
                 # filter ".xx's"
                 ds[:] = [dn for dn in ds if dn[0] != "."]
                 fs[:] = [fn for fn in fs if fn[0] != "."]
@@ -198,7 +198,7 @@ def update_new(full: bool = False) -> None:
     # 文件已经记录(path+name)？更新记录
     with alive_bar(len(filelist), title="Update") as bar:
         for file in filelist:
-            bar.text(file.path + "/" + file.name)
+            # bar.text(file.path + "/" + file.name)
             existing = File.reuse_get_path_name(file.path, file.name)
             if existing is not None:
                 checksum = checker.check(file, cache_only=True)
@@ -215,7 +215,7 @@ def update_new(full: bool = False) -> None:
     filelist2 = []
     with alive_bar(len(filelist), title="Inode") as bar:
         for file in filelist:
-            bar.text(file.path + "/" + file.name)
+            # bar.text(file.path + "/" + file.name)
             existing = None
             if file.dev is not None and file.ino is not None:
                 existing = File.reuse_get_dev_ino(file.dev, file.ino)
@@ -245,7 +245,7 @@ def update_new(full: bool = False) -> None:
     filelist = filelist2
     with alive_bar(len(filelist), title="Size") as bar:
         for file in filelist:
-            bar.text(file.path + "/" + file.name)
+            # bar.text(file.path + "/" + file.name)
             existings = File.reuse_list_size(file.size, full)
             checksum = checker.check(file, cache_only=True)
             if len(existings) > 0 or full:

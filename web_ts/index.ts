@@ -212,7 +212,14 @@ class App {
     };
     this.tagCheckData.onchange = () => {
       if (this.fileCheckMode === 0) {
-        // Do nothing
+        // Same
+        let tags: Array<string> = [];
+        this.tagCheckData.select.forEach((value, key) => {
+          if (value === 1) {
+            tags.push(key);
+          }
+        });
+        this.ele_tagsinput.value = tags.join(" ");
       } else if (this.fileCheckMode === 1) {
         let tags: Array<string> = [];
         this.tagCheckData.select.forEach((value, key) => {
@@ -444,7 +451,17 @@ class App {
           "div",
           ["file", "h-0", "check"],
           [
-            Ele("div", [], [file.name + (file.is_dir ? "/" : "")]),
+            Ele(
+              "div",
+              ["select"],
+              [
+                (this.lastMode == "find" && file.path !== ""
+                  ? file.path + "/"
+                  : "") + // TODO dirty
+                  file.name +
+                  (file.is_dir ? "/" : ""),
+              ],
+            ),
             Ele("div", [], tags),
           ],
         ),

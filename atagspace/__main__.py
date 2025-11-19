@@ -147,6 +147,16 @@ def main():
     subparser_extension_tagspaces_export.add_argument(
         "-s", "--singlefile", action="store_true"
     )
+    subparser_extension_tagspaces_library = subparser_extension_.add_parser(
+        "tagspaces_library", help="从 tagspaces 导入标记"
+    )
+    subparser_extension_tagspaces_library.add_argument("path", nargs="?", default="")
+    subparser_extension_tagspaces_export_library = subparser_extension_.add_parser(
+        "tagspaces_export_library", help="从 tagspaces 导出标记"
+    )
+    subparser_extension_tagspaces_export_library.add_argument(
+        "path", nargs="?", default=""
+    )
 
     args = parser.parse_args()
     db.init()
@@ -235,6 +245,12 @@ def main():
                 args.path, args.dry_run, args.singlefile
             )
             print(f"导出完成 {export_count} 个文件")
+        elif args.mode2 == "tagspaces_library":
+            import_count = tagspaces.tagspaces_category_import(args.path)
+            print(f"导入完成")
+        elif args.mode2 == "tagspaces_export_library":
+            export_count = tagspaces.tagspaces_category_export(args.path)
+            print(f"导出完成")
     else:
         parser.print_help()
     db.close()
