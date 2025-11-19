@@ -4,6 +4,7 @@ from typing import Optional
 import re
 import html
 import logging
+import time
 
 from dateparser import parse as datetime_parse
 
@@ -177,8 +178,14 @@ def parse_file_cached(file: File) -> Optional[tuple[str, str, datetime]]:
     info = parse_file(Path(tagfile.source_translate(file.path + "/" + file.name)))
     if info:
         sqlite_db.execute(
-            "INSERT OR REPLACE INTO singlefile (checksum, title, url, date) VALUES (?, ?, ?, ?)",
-            (checksum, info[0], info[1], info[2].strftime("%Y-%m-%d %H:%M:%S %z")),
+            "INSERT OR REPLACE INTO singlefile (checksum, title, url, date, lasttime) VALUES (?, ?, ?, ?, ?)",
+            (
+                checksum,
+                info[0],
+                info[1],
+                info[2].strftime("%Y-%m-%d %H:%M:%S %z"),
+                time.time(),
+            ),
         )
         sqlite_db.commit()
     return info
