@@ -6,6 +6,7 @@ import glob
 
 from .db import File, Source
 from . import checker
+from . import category
 
 from alive_progress import alive_bar, config_handler
 
@@ -76,6 +77,12 @@ def apply_filter(filter_: str, file: File) -> bool:
                 return arg[1:] in file.tags.split(" ")
             elif arg[0] == "-":
                 return arg[1:] not in file.tags.split(" ")
+            elif arg[0] == "~":
+                # in cate
+                for tag in file.tags.split(" "):
+                    if category.get_category_name(tag) == arg[1:]:
+                        return True
+                return False
             elif arg[0] == "!":
                 return not test_filter(arg[1:], True)
             else:
