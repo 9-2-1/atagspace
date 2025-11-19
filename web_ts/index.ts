@@ -59,7 +59,7 @@ class App {
     this.ele.tag_color,
     this.ele.tag_clear,
   );
-  lastMode: "go" | "find" = "go";
+  mode: "go" | "find" = "go";
 
   constructor() {
     this._setupNavigate();
@@ -88,12 +88,12 @@ class App {
       await this.fileLoadAPI();
     };
     this.ele.go.onclick = () => {
-      this.lastMode = "go";
+      this.mode = "go";
       this._reload();
     };
     this.ele.find.onclick = () => {
-      this.lastMode = "find";
-      this._reload(true);
+      this.mode = "find";
+      this._reload();
     };
   }
 
@@ -402,12 +402,12 @@ class App {
     this._updateURLState();
   }
 
-  async _reload(recurse: boolean = false) {
+  async _reload() {
     await this.categoryLoadAPI();
     this.categoryCheckData.reset();
     this.tagsLoad();
     this.fileCheckClear();
-    await this.fileLoadAPI(recurse);
+    await this.fileLoadAPI();
     this._updateURLState();
   }
 
@@ -418,7 +418,8 @@ class App {
     }
     return ret;
   }
-  async fileLoadAPI(recurse: boolean = false) {
+  async fileLoadAPI() {
+    let recurse = this.mode == "find";
     let path = this.ele_path.value;
     let filter = this.ele_filter.value;
     let list = await api.list({ path, filter, recurse });
@@ -455,7 +456,7 @@ class App {
               "div",
               ["select"],
               [
-                (this.lastMode == "find" && file.path !== ""
+                (this.mode == "find" && file.path !== ""
                   ? file.path + "/"
                   : "") + // TODO dirty
                   file.name +
@@ -562,7 +563,7 @@ class App {
     const params = new URLSearchParams();
     const path = this.ele_path.value;
     const filter = this.ele_filter.value;
-    const mode = this.lastMode;
+    const mode = this.mode;
 
     if (path) {
       params.set("path", path);
@@ -590,7 +591,7 @@ class App {
     if (filter !== null) {
       this.ele_filter.value = filter;
     }
-    this._reload(mode == "find");
+    this._reload();
   }
 }
 
