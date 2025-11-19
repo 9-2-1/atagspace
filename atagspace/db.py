@@ -119,7 +119,7 @@ class File:
         return [
             File(*row)
             for row in sqlite_db.execute(
-                "SELECT * FROM file WHERE (path == ? OR path GLOB ?) AND deltime IS NULL ORDER BY name",
+                "SELECT * FROM file WHERE (path == ? OR path GLOB ?) AND deltime IS NULL ORDER BY path, name",
                 (path, path_glob),
             )
         ]
@@ -437,6 +437,8 @@ def init() -> None:
         Category.get_id("")
     except TypeError:
         Category.set("", "#c0c0c0|#ffffff")
+    sqlite_db.execute("ANALYZE")
+    sqlite_db.commit()
 
 
 def close() -> None:
