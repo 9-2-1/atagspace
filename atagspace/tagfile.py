@@ -241,14 +241,12 @@ def update_new(full: bool = False) -> None:
             if existing is not None:
                 checksum = checker.check(file, cache_only=True)
                 if existing.deltime is None:
-                    log.info(
-                        f"Copy: {existing.path}/{existing.name} -> {file.path}/{file.name}"
-                    )
+                    log.info(f"Copy: {existing.path}{existing.name}")
+                    log.info(f"   -> {file.path}{file.name}")
                     create_file(file, checksum, tags=existing.tags)
                 else:
-                    log.info(
-                        f"Move: {existing.path}/{existing.name} -> {file.path}/{file.name}"
-                    )
+                    log.info(f"Move: {existing.path}{existing.name}")
+                    log.info(f"   -> {file.path}{file.name}")
                     update_existing(existing, file, checksum)
                 if not existing.is_dir and existing.checksum is None:
                     if full or existing.tags:
@@ -276,14 +274,12 @@ def update_new(full: bool = False) -> None:
                     )
                     if existing is not None:
                         if existing.deltime is None:
-                            log.info(
-                                f"Copy: {existing.path}/{existing.name} -> {file.path}/{file.name}"
-                            )
+                            log.info(f"Copy: {existing.path}{existing.name}")
+                            log.info(f"   -> {file.path}{file.name}")
                             create_file(file, checksum, tags=existing.tags)
                         else:
-                            log.info(
-                                f"Move: {existing.path}/{existing.name} -> {file.path}/{file.name}"
-                            )
+                            log.info(f"Move: {existing.path}{existing.name}")
+                            log.info(f"   -> {file.path}{file.name}")
                             update_existing(existing, file, checksum)
                     else:
                         create_file(file, checksum)
@@ -313,14 +309,12 @@ def update_new(full: bool = False) -> None:
             existing = File.reuse_get_size_checksum(file.size, checksum)
             if existing is not None:
                 if existing.deltime is None:
-                    log.info(
-                        f"Copy: {existing.path}/{existing.name} -> {file.path}/{file.name}"
-                    )
+                    log.info(f"Copy: {existing.path}{existing.name}")
+                    log.info(f"   -> {file.path}{file.name}")
                     create_file(file, checksum, tags=existing.tags)
                 else:
-                    log.info(
-                        f"Move: {existing.path}/{existing.name} -> {file.path}/{file.name}"
-                    )
+                    log.info(f"Move: {existing.path}{existing.name}")
+                    log.info(f"   -> {file.path}{file.name}")
                     update_existing(existing, file, checksum)
             else:
                 create_file(file, checksum)
@@ -344,5 +338,4 @@ def source_translate(path: str) -> str:
     parts = path.split("/")
     source = parts[1]
     srcpath = Source.get(source)
-    # log.info(f"Translate {path} to {srcpath} == {parts=}")
     return str(Path(srcpath) / "/".join(parts[2:]))

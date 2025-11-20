@@ -94,9 +94,12 @@ def tagspaces_tags_apply_ts_json(
     if tagjson.get("tags", []) != new_tags:
         tagjson["tags"] = new_tags
         if dry_run:
-            print(f"would write tagfile {tagfile} with tags {new_tags}")
+            log.info(f"would write tagfile {tagfile}")
+            log.info(f"          with tags {new_tags}")
             return True
         else:
+            log.info(f"Write tagfile {tagfile}")
+            log.info(f"    with tags {new_tags}")
             try:
                 tagfile.parent.mkdir(parents=True, exist_ok=True)
                 with open(tagfile, "w", encoding="utf-8-sig") as f:
@@ -176,9 +179,12 @@ def tagspaces_export(path: str, dry_run: bool = False, singlefile: bool = False)
                     newname = tagspaces_tags_apply_rename(realname, new_tags)
                 if newname != file.name:
                     if dry_run:
-                        print(f"would rename {fpath} to {newname}")
+                        log.info(f"would rename {fpath}")
+                        log.info(f"          to {newname}")
                     else:
                         try:
+                            log.info(f"rename {fpath}")
+                            log.info(f"    to {newname}")
                             fpath.rename(fpath.with_name(newname))
                             tagfile.file_rename(file.id, newname)
                         except Exception:
