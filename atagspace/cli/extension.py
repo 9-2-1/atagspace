@@ -44,8 +44,8 @@ def extension_tagspaces(path: str = typer.Argument("", help="路径")):
 @extension_cli.command("tagspaces_export")
 def extension_tagspaces_export(
     path: str = typer.Argument("", help="路径"),
-    dry_run: bool = typer.Option(False, "-d", "--dry-run", help="干运行"),
-    singlefile: bool = typer.Option(False, "-s", "--singlefile", help="单文件"),
+    dry_run: bool = typer.Option(False, "-d", "--dry-run", help="模拟运行"),
+    singlefile: bool = typer.Option(False, "-s", "--singlefile", help="处理 SingleFile 格式文件"),
 ):
     """从 tagspaces 导出标记"""
     export_count = tagspaces.tagspaces_export(path, dry_run, singlefile)
