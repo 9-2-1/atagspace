@@ -1,3 +1,4 @@
 aiohttp
 alive_progress
 dateparser
+typer
