@@ -13,3 +13,6 @@ __pycache__
 # database
 *.db
 *.db-*
+
+# other
+APPID.txt

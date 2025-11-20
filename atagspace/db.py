@@ -249,12 +249,8 @@ class Checksum:
             " checksum TEXT,"
             " lasttime REAL)"
         )
-        sqlite_db.execute("CREATE INDEX IF NOT EXISTS checksum_path ON checksum (path)")
         sqlite_db.execute(
             "CREATE INDEX IF NOT EXISTS checksum_size_mtime ON checksum (size, mtime)"
-        )
-        sqlite_db.execute(
-            "CREATE INDEX IF NOT EXISTS checksum_dev_ino ON checksum (dev, ino)"
         )
 
     @staticmethod

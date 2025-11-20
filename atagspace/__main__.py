@@ -129,6 +129,10 @@ def main():
     )
     subparser_extension_totag.add_argument("path", nargs="?", default="")
     subparser_extension_totag.add_argument("-m", "--markall", action="store_true")
+    subparser_extension_totag.add_argument(
+        "-c", "--clear-file-tags", action="store_true"
+    )
+    subparser_extension_totag.add_argument("-s", "--send-number", action="store_true")
     subparser_extension_sorttag = subparser_extension_.add_parser(
         "sorttag", help="排序标记"
     )
@@ -232,8 +236,12 @@ def main():
             category.set_tag_color(args.name, args.color)
     elif args.mode == "extension":
         if args.mode2 == "totag":
-            todo_count, finish_count = totag.totag(args.path, args.markall)
-            print(f"同步完成 {todo_count} 个待分类文件, {finish_count} 个已分类文件")
+            todo_count, finish_count, toread_count = totag.totag(
+                args.path, args.markall, args.clear_file_tags, args.send_number
+            )
+            print(
+                f'同步完成 {todo_count} 个待分类文件, {finish_count} 个已分类文件, {toread_count} 个"!待分类"文件'
+            )
         elif args.mode2 == "sorttag":
             sort_count = sorttag.sorttag(args.path)
             print(f"排序完成 {sort_count} 个文件")

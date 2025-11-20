@@ -1,9 +1,11 @@
 from .. import tagfile
 from ..db import File
+from .numbering import send
 
 
 AS_FILE = "◆"
 TODO = "●"
+TO_READ = "!待分类"
 
 
 def tag_has(file: File, tag: str) -> bool:
@@ -26,13 +28,17 @@ def cleartag(path: str):
 
 
 def totag(
-    path: str, markall: bool = False, clear_file_tags: bool = False
-) -> tuple[int, int]:
+    path: str,
+    markall: bool = False,
+    clear_file_tags: bool = False,
+    send_number: bool = False,
+) -> tuple[int, int, int]:
     todo_count = 0
     finish_count = 0
+    toread_count = 0
 
     def walk(path: str) -> bool:
-        nonlocal todo_count, finish_count
+        nonlocal todo_count, finish_count, toread_count
         sum_tag = False
         for file in tagfile.list_file(path, ""):
             if file.is_dir and not tag_has(file, AS_FILE):
@@ -46,6 +52,8 @@ def totag(
                         cleartag(
                             (file.path + "/" if file.path != "" else "") + file.name
                         )
+                if tag_has(file, TO_READ):
+                    toread_count += 1
                 if markall:
                     tag_set(file, TODO)
                     todo_count += 1
@@ -59,4 +67,7 @@ def totag(
         return sum_tag
 
     walk(path)
-    return todo_count, finish_count
+    if send_number:
+        send("tagspaces", todo_count)
+        send("tagspaces_todo", toread_count)
+    return todo_count, finish_count, toread_count
