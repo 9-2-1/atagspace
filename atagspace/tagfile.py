@@ -293,7 +293,7 @@ def update_new(full: bool = False) -> None:
 
     with alive_bar(
         sum(x.size for x in tocheck) + sum(x.size for x in newcheck),
-        title="ha256",
+        title="Sha256",
         unit="B",
         scale="SI",
     ) as bar:
