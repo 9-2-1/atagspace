@@ -102,6 +102,8 @@ class File:
 
     @staticmethod
     def list(path: str) -> list["File"]:
+        if path[-1] != "/":
+            path += "/"
         return [
             File(*row)
             for row in sqlite_db.execute(
@@ -112,15 +114,23 @@ class File:
 
     @staticmethod
     def list_recurse(path: str) -> "list[File]":
-        if path == "":
-            path_glob = "*"
-        else:
-            path_glob = glob.escape(path + "/") + "*"
+        if path[-1] == "/":
+            path = path[:-1]
+        if path == "/":
+            # oh, no!
+            return [
+                File(*row)
+                for row in sqlite_db.execute(
+                    "SELECT * FROM file WHERE deltime IS NULL ORDER BY path, name", ()
+                )
+            ]
+        slash = "/"
+        slash_plus_1 = chr(ord(slash) + 1)
         return [
             File(*row)
             for row in sqlite_db.execute(
-                "SELECT * FROM file WHERE (path == ? OR path GLOB ?) AND deltime IS NULL ORDER BY path, name",
-                (path, path_glob),
+                "SELECT * FROM file WHERE path >= ? AND path < ? AND deltime IS NULL ORDER BY path, name",
+                (path + slash, path + slash_plus_1),
             )
         ]
 
@@ -223,6 +233,13 @@ class File:
             )
         sqlite_db.commit()
 
+    @staticmethod
+    def purge_deleted(time: float) -> None:
+        sqlite_db.execute(
+            "DELETE FROM file WHERE deltime IS NOT NULL AND deltime < ?", (time,)
+        )
+        sqlite_db.commit()
+
 
 # checksum
 @dataclass
@@ -280,6 +297,11 @@ class Checksum:
         sqlite_db.execute(
             "UPDATE checksum SET lasttime = ? WHERE id = ?", (time.time(), self.id)
         )
+        sqlite_db.commit()
+
+    @staticmethod
+    def purge_deleted(time: float) -> None:
+        sqlite_db.execute("DELETE FROM checksum WHERE lasttime < ?", (time,))
         sqlite_db.commit()
 
 
@@ -435,6 +457,11 @@ def init() -> None:
         Category.set("", "#c0c0c0|#ffffff")
     sqlite_db.execute("ANALYZE")
     sqlite_db.commit()
+
+
+def purge_deleted(time: float) -> None:
+    File.purge_deleted(time)
+    Checksum.purge_deleted(time)
 
 
 def close() -> None:

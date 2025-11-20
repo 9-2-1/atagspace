@@ -5,8 +5,6 @@
 # filename[tag1 tag2 tag3 ...].ext
 # and that's it!
 
-from hmac import new
-import traceback
 import re
 from pathlib import Path
 import logging
@@ -47,7 +45,6 @@ def tagspaces_tags_get(file: Path) -> tuple[str, list[str]]:
                         tags.append(tag["title"])
         except Exception:
             log.warning(f"failed to read tagfile {tagfile}")
-            traceback.print_exc()
 
     tags = [tag.strip() for tag in tags if tag.strip() != ""]
     return realname, tags
@@ -128,9 +125,7 @@ def tagspaces_import(path: str) -> int:
     def walk(path: str) -> None:
         nonlocal finish_count
         for file in tagfile.list_file(path, ""):
-            path = tagfile.source_translate(
-                (file.path + "/" if file.path != "" else "") + file.name
-            )
+            path = tagfile.source_translate(file.path + file.name)
             realname, tags = tagspaces_tags_get(Path(path))
             tag_new = False
             for tag in tags:
@@ -140,7 +135,7 @@ def tagspaces_import(path: str) -> int:
             if tag_new:
                 finish_count += 1
             if file.is_dir:
-                walk((file.path + "/" if file.path != "" else "") + file.name)
+                walk(file.path + file.name)
 
     walk(path)
     return finish_count
@@ -165,15 +160,8 @@ def tagspaces_export(path: str, dry_run: bool = False, singlefile: bool = False)
                 hasnomove = NOMOVE in file.tags.split(
                     " "
                 ) or AS_FILE in file.tags.split(" ")
-                walk(
-                    (file.path + "/" if file.path != "" else "") + file.name,
-                    nomove or hasnomove,
-                )
-            fpath = Path(
-                tagfile.source_translate(
-                    (file.path + "/" if file.path != "" else "") + file.name
-                )
-            )
+                walk(file.path + file.name, nomove or hasnomove)
+            fpath = Path(tagfile.source_translate(file.path + file.name))
             new_tags = file.tags.split(" ")
             new_tags = [tag for tag in new_tags if tag not in BLOCKLIST and tag != ""]
             if nomove:
@@ -195,7 +183,6 @@ def tagspaces_export(path: str, dry_run: bool = False, singlefile: bool = False)
                             tagfile.file_rename(file.id, newname)
                         except Exception:
                             log.warning(f"failed to rename {fpath} to {newname}")
-                            traceback.print_exc()
                     finish_count += 1
 
     walk(path)

@@ -24,7 +24,7 @@ def cleartag(path: str):
     for file in tagfile.list_file(path, ""):
         tagfile.tag_file(file.id, [])
         if file.is_dir:
-            cleartag((file.path + "/" if file.path != "" else "") + file.name)
+            cleartag(file.path + file.name)
 
 
 def totag(
@@ -42,16 +42,14 @@ def totag(
         sum_tag = False
         for file in tagfile.list_file(path, ""):
             if file.is_dir and not tag_has(file, AS_FILE):
-                set_tag = walk((file.path + "/" if file.path != "" else "") + file.name)
+                set_tag = walk(file.path + file.name)
                 tag_set(file, TODO, set_tag)
                 if set_tag:
                     sum_tag = True
             else:
                 if file.is_dir and tag_has(file, AS_FILE):
                     if clear_file_tags:
-                        cleartag(
-                            (file.path + "/" if file.path != "" else "") + file.name
-                        )
+                        cleartag(file.path + file.name)
                 if tag_has(file, TO_READ):
                     toread_count += 1
                 if markall:

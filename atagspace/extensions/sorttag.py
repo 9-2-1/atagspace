@@ -22,7 +22,7 @@ def sorttag(path: str) -> int:
                 tagfile.tag_file(file.id, tags)
                 finish_count += 1
             if file.is_dir:
-                walk((file.path + "/" if file.path != "" else "") + file.name)
+                walk(file.path + file.name)
 
     walk(path)
     return finish_count

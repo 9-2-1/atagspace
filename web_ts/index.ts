@@ -76,13 +76,16 @@ class App {
 
   _setupNavigate() {
     this.ele.home.onclick = async () => {
-      await this.openFolder("");
+      await this.openFolder("/");
     };
     this.ele.up.onclick = async () => {
-      this.ele_path.value = this.ele_path.value
-        .split("/")
-        .slice(0, -1)
-        .join("/");
+      this.ele_path.value =
+        this.ele_path.value
+          .split("/")
+          .filter((x) => x !== "")
+          .slice(0, -1)
+          .map((x) => "/" + x)
+          .join("") + "/";
       await this.openFolder(this.ele_path.value);
       this.fileCheckClear();
       await this.fileLoadAPI();
@@ -108,7 +111,7 @@ class App {
       }
       const fullPath = this._fullPath(file);
       if (file.is_dir) {
-        await this.openFolder(fullPath);
+        await this.openFolder(fullPath + "/");
       } else {
         api.open_content(fullPath);
       }
@@ -412,11 +415,7 @@ class App {
   }
 
   _fullPath(file: APIlist[number]) {
-    let ret = file.name;
-    if (file.path !== "") {
-      ret = file.path + "/" + ret;
-    }
-    return ret;
+    return file.path + file.name;
   }
   async fileLoadAPI() {
     let recurse = this.mode == "find";
@@ -456,9 +455,7 @@ class App {
               "div",
               ["select"],
               [
-                (this.mode == "find" && file.path !== ""
-                  ? file.path + "/"
-                  : "") + // TODO dirty
+                (this.mode == "find" ? file.path : "") +
                   file.name +
                   (file.is_dir ? "/" : ""),
               ],
@@ -590,6 +587,9 @@ class App {
     }
     if (filter !== null) {
       this.ele_filter.value = filter;
+    }
+    if (mode !== null) {
+      this.mode = mode == "find" ? "find" : "go";
     }
     this._reload();
   }

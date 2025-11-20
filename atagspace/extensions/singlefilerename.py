@@ -178,20 +178,20 @@ def parse_file_cached(file: File) -> Optional[tuple[str, str, datetime]]:
         )
         date = datetime.strptime(date, "%Y-%m-%d %H:%M:%S %z")
         return title, url, date
-    info = parse_file(Path(tagfile.source_translate(file.path + "/" + file.name)))
-    if info:
+    info = parse_file(Path(tagfile.source_translate(file.path + file.name)))
+    if info is not None:
+        title, url, date = info
         sqlite_db.execute(
             "INSERT OR REPLACE INTO singlefile (checksum, title, url, date, lasttime) VALUES (?, ?, ?, ?, ?)",
-            (
-                checksum,
-                info[0],
-                info[1],
-                info[2].strftime("%Y-%m-%d %H:%M:%S %z"),
-                time.time(),
-            ),
+            (checksum, title, url, date.strftime("%Y-%m-%d %H:%M:%S %z"), time.time()),
         )
         sqlite_db.commit()
     return info
+
+
+def purge_deleted(time: float) -> None:
+    sqlite_db.execute("DELETE FROM singlefile WHERE lasttime < ?", (time,))
+    sqlite_db.commit()
 
 
 def check_rename(file: File, tags: list[str]) -> Optional[str]:
@@ -200,12 +200,7 @@ def check_rename(file: File, tags: list[str]) -> Optional[str]:
     info = parse_file_cached(file)
     if info:
         title, url, date = info
-        newname = name_by(
-            Path(tagfile.source_translate(file.path + "/" + file.name)),
-            title,
-            url,
-            tags,
-            date,
-        )
+        origpath = Path(tagfile.source_translate(file.path + file.name))
+        newname = name_by(origpath, title, url, tags, date)
         return newname
     return None

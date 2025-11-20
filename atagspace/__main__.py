@@ -1,5 +1,6 @@
 import argparse
 import logging
+import time
 
 from aiohttp import web
 from . import db
@@ -8,11 +9,12 @@ from . import category
 from .extensions import totag
 from .extensions import sorttag
 from .extensions import tagspaces
+from .extensions import singlefilerename
 from .web import app
 
 
 logging.basicConfig(level=logging.INFO)
-
+log = logging.getLogger(__name__)
 
 tagfmt_errors: set[str] = set()
 
@@ -30,7 +32,6 @@ def colorparse(c: str) -> tuple[int, int, int]:
 
 def tagfmt(tag: str, color: bool = False) -> str:
     ret = tag
-    ret = f"[{ret}]"
     if color:
         c = category.get_color(tag)
         if c is not None:
@@ -41,7 +42,7 @@ def tagfmt(tag: str, color: bool = False) -> str:
                 ret = f"\x1b[38;2;{fr};{fg};{fb}m\x1b[48;2;{br};{bg};{bb}m{ret}\x1b[39;49m"
             except Exception:
                 if c not in tagfmt_errors:
-                    print(f"Cannot parse color {c}\n")
+                    log.warning(f"Cannot parse color {c}\n")
                     tagfmt_errors.add(c)
     return ret
 
@@ -55,6 +56,8 @@ def main():
     subparser_db = subparsers.add_parser("db", help="数据库")
     subparser_db_ = subparser_db.add_subparsers(dest="mode2")
     subparser_db_init = subparser_db_.add_parser("init", help="初始化数据库")
+    subparser_db_clean = subparser_db_.add_parser("clean", help="清理数据库")
+    subparser_db_clean.add_argument("cdays", type=float, help="过期时间(天)")
     subparser_tagfile = subparsers.add_parser("tagfile", help="文件管理")
     subparser_tagfile_ = subparser_tagfile.add_subparsers(dest="mode2")
     subparser_tagfile_listfile = subparser_tagfile_.add_parser(
@@ -169,24 +172,25 @@ def main():
     elif args.mode == "db":
         if args.mode2 == "init":
             # the db is initialized whether command run
-            pass
+            singlefilerename.init()
+        elif args.mode2 == "clean":
+            expire_time = time.time() - args.cdays * 24 * 60 * 60
+            db.purge_deleted(expire_time)
+            singlefilerename.purge_deleted(expire_time)
+            print(f"清理完成")
         else:
             subparser_db.print_help()
     elif args.mode == "tagfile":
         if args.mode2 == "listfile":
             ret = tagfile.list_file(args.path, args.filter, args.recurse, args.limits)
             for file in ret:
-                if file.path != "":
-                    print(
-                        str(file.id)
-                        + " "
-                        + file.path
-                        + "/"
-                        + file.name
-                        + ("/" if file.is_dir else "")
-                    )
-                else:
-                    print(str(file.id) + " " + file.name + ("/" if file.is_dir else ""))
+                print(
+                    str(file.id)
+                    + " "
+                    + file.path
+                    + file.name
+                    + ("/" if file.is_dir else "")
+                )
                 print(
                     " ".join(
                         tagfmt(tag, args.color)
@@ -224,16 +228,19 @@ def main():
             for tag in args.tags.split(" "):
                 category.remove_tag(tag)
         elif args.mode2 == "listtag":
-            for cate in category.list_tag():
-                print("#" + cate.name)
+            for cate in category.list_category():
+                print("# " + cate.name)
                 print(
                     " ".join(
                         tagfmt(tag.name, args.color)
                         for tag in category.list_tag(cate.name)
                     )
                 )
+                print()
         elif args.mode2 == "setcolor":
             category.set_tag_color(args.name, args.color)
+        else:
+            subparser_category.print_help()
     elif args.mode == "extension":
         if args.mode2 == "totag":
             todo_count, finish_count, toread_count = totag.totag(
@@ -259,6 +266,8 @@ def main():
         elif args.mode2 == "tagspaces_export_library":
             export_count = tagspaces.tagspaces_category_export(args.path)
             print(f"导出完成")
+        else:
+            subparser_extension.print_help()
     else:
         parser.print_help()
     db.close()

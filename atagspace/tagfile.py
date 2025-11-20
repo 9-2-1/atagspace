@@ -3,6 +3,7 @@ from dataclasses import dataclass
 import time
 import re
 import glob
+import logging
 
 from .db import File, Source
 from . import checker
@@ -11,6 +12,8 @@ from . import category
 from alive_progress import alive_bar, config_handler
 
 config_handler.set_global(enrich_print=False, dual_line=True, length=10)  # type: ignore
+
+log = logging.getLogger(__name__)
 
 
 @dataclass
@@ -22,6 +25,13 @@ class ListFile:
     dev: int
     ino: int
     is_dir: bool
+
+
+def path_normalize(path: str) -> str:
+    path_norm = path
+    if path == "" or path_norm[0] != "/":
+        path_norm = "/" + path_norm
+    return path_norm
 
 
 def tag_file(id_: int, tags: list[str]) -> None:
@@ -65,7 +75,7 @@ def apply_filter(filter_: str, file: File) -> bool:
                 regex = glob.translate(arg, recursive=True, include_hidden=True)
                 if "/" in arg:
                     return (
-                        re.match(regex, file.path + "/" + file.name, re.IGNORECASE)
+                        re.match(regex, file.path + file.name, re.IGNORECASE)
                         is not None
                     )
                 else:
@@ -99,6 +109,7 @@ def apply_filter(filter_: str, file: File) -> bool:
 def list_file(
     path: str, filter_: str, recurse: bool = False, limit: int = 1000
 ) -> list[File]:
+    path = path_normalize(path)
     if recurse:
         files = File.list_recurse(path)
     else:
@@ -122,8 +133,6 @@ def file_rename(id_: int, name: str) -> None:
 
 
 def update_new(full: bool = False) -> None:
-    # 1.update deltime
-    File.mark_all_delete()
     filelist: list[ListFile] = []
 
     with alive_bar(title="List") as bar:
@@ -143,14 +152,14 @@ def update_new(full: bool = False) -> None:
                     )
                 )
             except Exception as err:
-                print(f"{path}: {err}")
+                log.error(f"{path}: {err}")
             bar()
 
         for source in Source.list():
             root = Path(source.path)
             filelist.append(
                 ListFile(
-                    path="",
+                    path="/",
                     name=source.name,
                     size=0,
                     mtime=time.time(),
@@ -162,7 +171,9 @@ def update_new(full: bool = False) -> None:
             bar()
             for p, ds, fs in root.walk():
                 rela = p.relative_to(root)
-                path = "/".join([source.name, *rela.parts])
+                path = (
+                    "/" + source.name + "/" + "".join(part + "/" for part in rela.parts)
+                )
                 bar.text(path)
                 # filter ".xx's"
                 ds[:] = [dn for dn in ds if dn[0] != "."]
@@ -201,11 +212,12 @@ def update_new(full: bool = False) -> None:
     tocheck: list[ListFile | File] = []
     newcheck: list[ListFile] = []
 
+    File.mark_all_delete()
     filelist2: list[ListFile] = []
     # 文件已经记录(path+name)？更新记录
     with alive_bar(len(filelist), title="Update") as bar:
         for file in filelist:
-            # bar.text(file.path + "/" + file.name)
+            # bar.text(file.path + file.name)
             existing = File.reuse_get_path_name(file.path, file.name)
             if existing is not None:
                 checksum = checker.check(file, cache_only=True)
@@ -222,19 +234,19 @@ def update_new(full: bool = False) -> None:
     filelist2 = []
     with alive_bar(len(filelist), title="Inode") as bar:
         for file in filelist:
-            # bar.text(file.path + "/" + file.name)
+            # bar.text(file.path + file.name)
             existing = None
             if file.dev is not None and file.ino is not None:
                 existing = File.reuse_get_dev_ino(file.dev, file.ino)
             if existing is not None:
                 checksum = checker.check(file, cache_only=True)
                 if existing.deltime is None:
-                    print(
+                    log.info(
                         f"Copy: {existing.path}/{existing.name} -> {file.path}/{file.name}"
                     )
                     create_file(file, checksum, tags=existing.tags)
                 else:
-                    print(
+                    log.info(
                         f"Move: {existing.path}/{existing.name} -> {file.path}/{file.name}"
                     )
                     update_existing(existing, file, checksum)
@@ -252,7 +264,7 @@ def update_new(full: bool = False) -> None:
     filelist = filelist2
     with alive_bar(len(filelist), title="Size") as bar:
         for file in filelist:
-            # bar.text(file.path + "/" + file.name)
+            # bar.text(file.path + file.name)
             existings = File.reuse_list_size(file.size, full)
             checksum = checker.check(file, cache_only=True)
             if len(existings) > 0 or full:
@@ -264,12 +276,12 @@ def update_new(full: bool = False) -> None:
                     )
                     if existing is not None:
                         if existing.deltime is None:
-                            print(
+                            log.info(
                                 f"Copy: {existing.path}/{existing.name} -> {file.path}/{file.name}"
                             )
                             create_file(file, checksum, tags=existing.tags)
                         else:
-                            print(
+                            log.info(
                                 f"Move: {existing.path}/{existing.name} -> {file.path}/{file.name}"
                             )
                             update_existing(existing, file, checksum)
@@ -281,36 +293,32 @@ def update_new(full: bool = False) -> None:
 
     with alive_bar(
         sum(x.size for x in tocheck) + sum(x.size for x in newcheck),
-        title="Sha256",
+        title="ha256",
         unit="B",
         scale="SI",
     ) as bar:
         for file in tocheck:
-            bar.text(file.path + "/" + file.name)
+            bar.text(file.path + file.name)
             existing = File.reuse_get_path_name(file.path, file.name)
             assert existing is not None
             checksum = checker.check(file)
             update_existing(existing, file, checksum)
             bar(file.size)
         for file in newcheck:
-            bar.text(file.path + "/" + file.name)
+            bar.text(file.path + file.name)
             existing = None
-            try:
-                checksum = checker.check(file)
-            except Exception as err:
-                print(f"{file}: {err}")
-                continue
+            checksum = checker.check(file)
             if checksum is None:
                 continue
             existing = File.reuse_get_size_checksum(file.size, checksum)
             if existing is not None:
                 if existing.deltime is None:
-                    print(
+                    log.info(
                         f"Copy: {existing.path}/{existing.name} -> {file.path}/{file.name}"
                     )
                     create_file(file, checksum, tags=existing.tags)
                 else:
-                    print(
+                    log.info(
                         f"Move: {existing.path}/{existing.name} -> {file.path}/{file.name}"
                     )
                     update_existing(existing, file, checksum)
@@ -332,7 +340,9 @@ def update_src(path: str) -> None:
 
 
 def source_translate(path: str) -> str:
+    path = path_normalize(path)
     parts = path.split("/")
-    source = parts[0]
+    source = parts[1]
     srcpath = Source.get(source)
-    return str(Path(srcpath) / "/".join(parts[1:]))
+    # log.info(f"Translate {path} to {srcpath} == {parts=}")
+    return str(Path(srcpath) / "/".join(parts[2:]))
