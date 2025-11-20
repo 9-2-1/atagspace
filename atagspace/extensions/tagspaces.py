@@ -10,6 +10,8 @@ from pathlib import Path
 import logging
 import json
 from typing import Any
+import uuid
+import time
 
 log = logging.getLogger(__name__)
 
@@ -213,12 +215,7 @@ def tagspaces_category_export(path: str) -> None:
         "tagGroups": [
             {
                 "title": cate.name,
-                "color": (
-                    cate.color if cate.color is not None else "#c0c0c0|#ffffff"
-                ).split("|")[1],
-                "textcolor": (
-                    cate.color if cate.color is not None else "#c0c0c0|#ffffff"
-                ).split("|")[0],
+                "uuid": str(uuid.uuid4()),
                 "children": [
                     {
                         "title": tag.name,
@@ -227,6 +224,15 @@ def tagspaces_category_export(path: str) -> None:
                     }
                     for tag in category.list_tag(cate.name)
                 ],
+                "created_date": time.time(),
+                "color": (
+                    cate.color if cate.color is not None else "#c0c0c0|#ffffff"
+                ).split("|")[1],
+                "textcolor": (
+                    cate.color if cate.color is not None else "#c0c0c0|#ffffff"
+                ).split("|")[0],
+                "modified_date": time.time(),
+                "expanded": True,
             }
             for cate in category.list_category()
         ],

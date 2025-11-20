@@ -326,7 +326,10 @@ class Category:
 
     @staticmethod
     def list() -> list["Category"]:
-        return [Category(*row) for row in sqlite_db.execute("SELECT * FROM category")]
+        return [
+            Category(*row)
+            for row in sqlite_db.execute("SELECT * FROM category ORDER BY name")
+        ]
 
     @staticmethod
     def set(name: str, color: str | None) -> None:
@@ -393,12 +396,15 @@ class Tag:
     @staticmethod
     def list(cate: str | None = None) -> list["Tag"]:
         if cate is None:
-            return [Tag(*row) for row in sqlite_db.execute("SELECT * FROM tag")]
+            return [
+                Tag(*row)
+                for row in sqlite_db.execute("SELECT * FROM tag ORDER BY name")
+            ]
         cate_id = Category.get_id(cate)
         return [
             Tag(*row)
             for row in sqlite_db.execute(
-                "SELECT * FROM tag WHERE cate_id = ?", (cate_id,)
+                "SELECT * FROM tag WHERE cate_id = ? ORDER BY name", (cate_id,)
             )
         ]
 

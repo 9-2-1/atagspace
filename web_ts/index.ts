@@ -487,28 +487,26 @@ class App {
     // preserve focus
     let focused = this.categoryCheckGroup.focusedElem()?.name;
     this.categoryCheckGroup.clear();
-    category
-      .sort((a, b) => compare(a.name, b.name))
-      .forEach((cate) => {
-        const name = cate.name;
-        const categoryCheck = new CheckElem(
-          name,
-          Ele("div", ["category", "check"], [name == "" ? "未分类" : name]),
-        );
-        this.categoryCheckData.add(categoryCheck);
-        this.categoryCheckGroup.add(categoryCheck);
-        const catecolor = cate.color ?? category[0]?.color ?? "#c0c0c0|#ffffff";
-        this.applyColor(categoryCheck.elem, catecolor);
-        this.ele.category.appendChild(categoryCheck.elem);
-        cate.tags.forEach((tag) => {
-          this.colorindex.set(tag.name, tag.color ?? catecolor);
-        });
-        this.cateindex.set(cate.name, cate);
-        this.categoryCheckData.default_.set(cate.name, 1);
-        if (cate.name === focused) {
-          this.categoryCheckGroup.focus(categoryCheck);
-        }
+    category.forEach((cate) => {
+      const name = cate.name;
+      const categoryCheck = new CheckElem(
+        name,
+        Ele("div", ["category", "check"], [name == "" ? "未分类" : name]),
+      );
+      this.categoryCheckData.add(categoryCheck);
+      this.categoryCheckGroup.add(categoryCheck);
+      const catecolor = cate.color ?? category[0]?.color ?? "#c0c0c0|#ffffff";
+      this.applyColor(categoryCheck.elem, catecolor);
+      this.ele.category.appendChild(categoryCheck.elem);
+      cate.tags.forEach((tag) => {
+        this.colorindex.set(tag.name, tag.color ?? catecolor);
       });
+      this.cateindex.set(cate.name, cate);
+      this.categoryCheckData.default_.set(cate.name, 1);
+      if (cate.name === focused) {
+        this.categoryCheckGroup.focus(categoryCheck);
+      }
+    });
     this.tagsLoad();
     this.tagColorReload();
   }
@@ -521,19 +519,17 @@ class App {
       if (cate === undefined) {
         return;
       }
-      cate.tags
-        .sort((a, b) => compare(a.name, b.name))
-        .forEach((tag) => {
-          const tagCheck = new CheckElem(
-            tag.name,
-            Ele("div", ["tag", "check"], [tag.name]),
-          );
-          this.ele.tags.appendChild(tagCheck.elem);
-          const color = this.getColor(tag.name);
-          this.applyColor(tagCheck.elem, color);
-          this.tagCheckData.add(tagCheck);
-          this.tagCheckGroup.add(tagCheck);
-        });
+      cate.tags.forEach((tag) => {
+        const tagCheck = new CheckElem(
+          tag.name,
+          Ele("div", ["tag", "check"], [tag.name]),
+        );
+        this.ele.tags.appendChild(tagCheck.elem);
+        const color = this.getColor(tag.name);
+        this.applyColor(tagCheck.elem, color);
+        this.tagCheckData.add(tagCheck);
+        this.tagCheckGroup.add(tagCheck);
+      });
     });
   }
 
