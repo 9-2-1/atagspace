@@ -81,7 +81,7 @@ def apply_filter(filter_: str, file: File) -> bool:
                 else:
                     return re.match(regex, file.name, re.IGNORECASE) is not None
             else:
-                return arg in file.name
+                return arg.lower() in file.name.lower()
         else:
             if arg[0] == "+":
                 return arg[1:] in file.tags.split(" ")
