@@ -65,7 +65,7 @@ class File:
     checksum: str | None
     is_dir: bool
     tags: str
-    deltime: float
+    deltime: float | None
 
     @staticmethod
     def init() -> None:
@@ -259,7 +259,7 @@ class File:
             old_path_lower_bound = old_path_name + "/"
             old_path_upper_bound = old_path_name + chr(ord("/") + 1)
             sqlite_db.execute(
-                "UPDATE file SET path = ? + SUBSTR(path, ? + 1) WHERE path >= ? AND path < ?",
+                "UPDATE file SET path = concat(?, SUBSTR(path, ? + 1)) WHERE path >= ? AND path < ?",
                 (
                     new_path_name + "/",
                     len(old_path_lower_bound),
