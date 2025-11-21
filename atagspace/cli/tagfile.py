@@ -19,7 +19,7 @@ def tagfile_listfile(
     limits: int = typer.Option(1000, "-l", "--limits", help="限制数量"),
 ):
     """列出文件"""
-    ret = tagfile.list_file(path, filter_str, recurse, limits)
+    ret = tagfile.list_file(path, tagfile.arglist(filter_str), recurse, limits)
     for file in ret:
         typer.echo(
             str(file.id) + " " + file.path + file.name + ("/" if file.is_dir else "")

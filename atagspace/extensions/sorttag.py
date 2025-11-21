@@ -14,7 +14,7 @@ def sorttag(path: str) -> int:
 
     def walk(path: str) -> None:
         nonlocal finish_count
-        for file in tagfile.list_file(path, ""):
+        for file in tagfile.list_file(path):
             tags = file.tags.split(" ")
             tags.sort(key=tags_key)
             sorted_tag = " ".join(tags)

@@ -130,7 +130,7 @@ def tagspaces_import(path: str) -> int:
 
     def walk(path: str) -> None:
         nonlocal finish_count
-        for file in tagfile.list_file(path, ""):
+        for file in tagfile.list_file(path):
             path = tagfile.source_translate(file.path + file.name)
             realname, tags = tagspaces_tags_get(Path(path))
             tag_new = False
@@ -157,7 +157,7 @@ def tagspaces_export(path: str, dry_run: bool = False, singlefile: bool = False)
 
     def walk(path: str, nomove: bool = False) -> None:
         nonlocal finish_count
-        for file in tagfile.list_file(path, ""):
+        for file in tagfile.list_file(path):
             if file.is_dir:
                 hasnomove = TAG_NOMOVE in file.tags.split(
                     " "
@@ -185,7 +185,7 @@ def tagspaces_export(path: str, dry_run: bool = False, singlefile: bool = False)
                             log.info(f"rename {fpath}")
                             log.info(f"    to {newname}")
                             fpath.rename(fpath.with_name(newname))
-                            tagfile.file_rename(file.id, newname)
+                            tagfile.rename_file(file.id, newname)
                         except Exception:
                             log.warning(f"failed to rename {fpath} to {newname}")
                     finish_count += 1

@@ -17,7 +17,7 @@ def tag_set(file: File, tag: str, set_: bool = True):
 
 
 def cleartag(path: str):
-    for file in tagfile.list_file(path, ""):
+    for file in tagfile.list_file(path):
         tagfile.tag_file(file.id, [])
         if file.is_dir:
             cleartag(file.path + file.name)
@@ -36,7 +36,7 @@ def totag(
     def walk(path: str) -> bool:
         nonlocal todo_count, finish_count, toread_count
         sum_tag = False
-        for file in tagfile.list_file(path, ""):
+        for file in tagfile.list_file(path):
             if file.is_dir and not tag_has(file, TAG_AS_FILE):
                 set_tag = walk(file.path + file.name)
                 tag_set(file, TAG_TODO, set_tag)

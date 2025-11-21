@@ -40,7 +40,7 @@ def webjson(
 async def handle_list(
     path: str, filter: str = "", recurse: bool = False, limit: int = 1000
 ) -> Any:
-    return tagfile.list_file(path, filter, recurse, limit)
+    return tagfile.list_file(path, tagfile.arglist(filter), recurse, limit)
 
 
 @webjson

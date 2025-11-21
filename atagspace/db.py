@@ -217,21 +217,33 @@ class File:
         return File(*row) if row is not None else None
 
     @staticmethod
-    # TODO: fix subitem path
-    def set_name(id_: int, name: str) -> None:
+    def set_path_name(id_: int, new_path: str | None, new_name: str | None) -> None:
         with sqlite_db:
-            path, old_name = sqlite_db.execute(
+            old_path: str
+            old_name: str
+            old_path, old_name = sqlite_db.execute(
                 "SELECT path, name FROM file WHERE id = ?", (id_,)
             ).fetchone()
-            new_path = (path + "/" if path != "" else "") + name
-            old_path = (path + "/" if path != "" else "") + old_name
-            sqlite_db.execute("UPDATE file SET name = ? WHERE id = ?", (name, id_))
+            if new_path is None:
+                new_path = old_path
+            if new_name is None:
+                new_name = old_name
+            new_path_name = new_path + new_name
+            old_path_name = old_path + old_name
             sqlite_db.execute(
-                "UPDATE file SET path = ?2 WHERE path == ?1", (old_path, new_path)
+                "UPDATE file SET name = ?, path = ? WHERE id = ?",
+                (new_name, new_path, id_),
             )
+            old_path_lower_bound = old_path_name + "/"
+            old_path_upper_bound = old_path_name + chr(ord("/") + 1)
             sqlite_db.execute(
-                "UPDATE file SET path = ?2 + '/' + SUBSTR(path, ?3 + 1) WHERE path GLOB ?1",
-                (glob.escape(old_path + "/") + "*", new_path, len(old_path + "/")),
+                "UPDATE file SET path = ? + SUBSTR(path, ? + 1) WHERE path >= ? AND path < ?",
+                (
+                    new_path_name + "/",
+                    len(old_path_lower_bound),
+                    old_path_lower_bound,
+                    old_path_upper_bound,
+                ),
             )
         sqlite_db.commit()
 

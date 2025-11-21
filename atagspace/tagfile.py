@@ -49,7 +49,7 @@ def tag_file_change(id_: int, adds: list[str], removes: list[str]) -> None:
     File.set_tags(id_, tags)
 
 
-def arglist(x: str) -> list[str]:
+def arglist(x: str) -> list[str] | None:
     quoted = False
     v = ""
     args: list[str] = []
@@ -64,10 +64,12 @@ def arglist(x: str) -> list[str]:
             v += i
     if v != "":
         args.append(v)
-    return args
+    return args if len(args) > 0 else None
 
 
-def apply_filter(filter_: str, file: File) -> bool:
+def apply_filter(filter_: list[str], file: File) -> tuple[bool, dict[str, set[str]]]:
+    group_match: dict[str, set[str]] = {}
+
     def test_filter(arg: str, disable_sym: bool = False) -> bool:
         if arg[0] == arg[-1] == '"':
             return test_filter(arg[1:-1], True)
@@ -92,6 +94,7 @@ def apply_filter(filter_: str, file: File) -> bool:
                 # in cate
                 for tag in file.tags.split(" "):
                     if category.get_category_name(tag) == arg[1:]:
+                        group_match.setdefault("cate", set()).add(tag)
                         return True
                 return False
             elif arg[0] == "!":
@@ -99,23 +102,23 @@ def apply_filter(filter_: str, file: File) -> bool:
             else:
                 return test_filter(arg, True)
 
-    args = arglist(filter_)
-    for arg in args:
+    for arg in filter_:
         if not test_filter(arg):
-            return False
+            return False, {}
 
-    return True
+    return True, group_match
 
 
 def list_file(
-    path: str, filter_: str, recurse: bool = False, limit: int = 1000
+    path: str, filter_: list[str] | None = None, recurse: bool = False, limit: int = 1000
 ) -> list[File]:
     path = path_normalize(path)
     if recurse:
         files = File.list_recurse(path)
     else:
         files = File.list(path)
-    files = [file for file in files if apply_filter(filter_, file)]
+    if filter_ is not None:
+        files = [file for file in files if apply_filter(filter_, file)[0]]
     if not recurse or limit == 0:
         return files
     files = files[:limit]
@@ -129,8 +132,12 @@ def i64(x: int) -> int:
     return x
 
 
-def file_rename(id_: int, name: str) -> None:
-    File.set_name(id_, name)
+def rename_file(id_: int, name: str) -> None:
+    move_file(id_, None, name)
+
+
+def move_file(id_: int, path: str | None, name: str | None) -> None:
+    File.set_path_name(id_, path, name)
 
 
 def update_new(full: bool = False) -> None:
