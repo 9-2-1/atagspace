@@ -6,7 +6,7 @@ class ColorSet {
     public eleSet: HTMLElement,
     public eleClear: HTMLElement,
   ) {
-    this.set("#c0c0c0|#ffffff");
+    this.set(DEFAULT_COLOR);
     this.eleSet.onclick = () => {
       this.onSet(this.get());
     };

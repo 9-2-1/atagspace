@@ -1,11 +1,7 @@
 from .. import tagfile
 from ..db import File
 from .numbering import send
-
-
-AS_FILE = "◆"
-TODO = "●"
-TO_READ = "!待分类"
+from ..constants import TAG_TODO, TAG_AS_FILE, TAG_TOREAD
 
 
 def tag_has(file: File, tag: str) -> bool:
@@ -41,23 +37,23 @@ def totag(
         nonlocal todo_count, finish_count, toread_count
         sum_tag = False
         for file in tagfile.list_file(path, ""):
-            if file.is_dir and not tag_has(file, AS_FILE):
+            if file.is_dir and not tag_has(file, TAG_AS_FILE):
                 set_tag = walk(file.path + file.name)
-                tag_set(file, TODO, set_tag)
+                tag_set(file, TAG_TODO, set_tag)
                 if set_tag:
                     sum_tag = True
             else:
-                if file.is_dir and tag_has(file, AS_FILE):
+                if file.is_dir and tag_has(file, TAG_AS_FILE):
                     if clear_file_tags:
                         cleartag(file.path + file.name)
-                if tag_has(file, TO_READ):
+                if tag_has(file, TAG_TOREAD):
                     toread_count += 1
                 if markall:
-                    tag_set(file, TODO)
+                    tag_set(file, TAG_TODO)
                     todo_count += 1
                     sum_tag = True
                 else:
-                    if tag_has(file, TODO):
+                    if tag_has(file, TAG_TODO):
                         todo_count += 1
                         sum_tag = True
                     else:

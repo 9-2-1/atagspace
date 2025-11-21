@@ -8,6 +8,7 @@ import logging
 from .db import File, Source
 from . import checker
 from . import category
+from .constants import TAG_TODO
 
 from alive_progress import alive_bar, config_handler
 
@@ -183,7 +184,7 @@ def update_new(full: bool = False) -> None:
                 for fn in fs:
                     perfile(path, p / fn, False)
 
-    def create_file(file: ListFile, checksum: str | None, tags: str = "") -> None:
+    def create_file(file: ListFile, checksum: str | None, tags: str = TAG_TODO) -> None:
         File.add(
             path=file.path,
             name=file.name,

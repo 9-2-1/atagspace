@@ -3,6 +3,8 @@ import glob
 import time
 from dataclasses import dataclass
 
+from .constants import DEFAULT_COLOR
+
 sqlite_db = sqlite3.connect("atagspace.db")
 sqlite_db.execute("PRAGMA auto_vacuum = FULL;")
 sqlite_db.execute("PRAGMA foreign_keys = ON;")
@@ -366,10 +368,10 @@ class Category:
             "SELECT color FROM category WHERE id = ?", (id,)
         ).fetchone()
         if query is None:
-            return "#c0c0c0|#ffffff"
+            return DEFAULT_COLOR
         color = query[0]
         if color is None:
-            return "#c0c0c0|#ffffff"
+            return DEFAULT_COLOR
         return color
 
 
@@ -460,7 +462,7 @@ def init() -> None:
     try:
         Category.get_id("")
     except TypeError:
-        Category.set("", "#c0c0c0|#ffffff")
+        Category.set("", DEFAULT_COLOR)
     sqlite_db.execute("ANALYZE")
     sqlite_db.commit()
 

@@ -15,6 +15,7 @@ import time
 
 log = logging.getLogger(__name__)
 
+from ..constants import TAG_TODO, TAG_AS_FILE, TAG_IGNORE, TAG_NOMOVE, DEFAULT_COLOR
 from ..db import File
 from .. import tagfile
 from .. import category
@@ -146,11 +147,7 @@ def tagspaces_import(path: str) -> int:
     return finish_count
 
 
-NOMOVE = "⌀"
-HIDDEN = "◌"
-AS_FILE = "◆"
-TODO = "●"
-BLOCKLIST: set[str] = set((TODO, AS_FILE, HIDDEN, NOMOVE))
+BLOCKLIST: set[str] = set((TAG_TODO, TAG_AS_FILE, TAG_IGNORE, TAG_NOMOVE))
 
 
 def tagspaces_export(path: str, dry_run: bool = False, singlefile: bool = False) -> int:
@@ -162,9 +159,9 @@ def tagspaces_export(path: str, dry_run: bool = False, singlefile: bool = False)
         nonlocal finish_count
         for file in tagfile.list_file(path, ""):
             if file.is_dir:
-                hasnomove = NOMOVE in file.tags.split(
+                hasnomove = TAG_NOMOVE in file.tags.split(
                     " "
-                ) or AS_FILE in file.tags.split(" ")
+                ) or TAG_AS_FILE in file.tags.split(" ")
                 walk(file.path + file.name, nomove or hasnomove)
             fpath = Path(tagfile.source_translate(file.path + file.name))
             new_tags = file.tags.split(" ")
@@ -226,10 +223,10 @@ def tagspaces_category_export(path: str) -> None:
                 ],
                 "created_date": time.time(),
                 "color": (
-                    cate.color if cate.color is not None else "#c0c0c0|#ffffff"
+                    cate.color if cate.color is not None else DEFAULT_COLOR
                 ).split("|")[1],
                 "textcolor": (
-                    cate.color if cate.color is not None else "#c0c0c0|#ffffff"
+                    cate.color if cate.color is not None else DEFAULT_COLOR
                 ).split("|")[0],
                 "modified_date": time.time(),
                 "expanded": True,

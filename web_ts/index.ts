@@ -26,6 +26,8 @@ const elename = [
   "preview",
 ] as const;
 
+const DEFAULT_COLOR = "#C0C0C0|#FFFFFF";
+
 function compare(a: string, b: string) {
   return a > b ? 1 : a < b ? -1 : 0;
 }
@@ -348,7 +350,7 @@ class App {
         this.categoryCheckData.select.set(elem.name, 1);
       }
       this.categoryColorSet.set(
-        this.cateindex.get(elem.name)?.color ?? "#c0c0c0|#ffffff",
+        this.cateindex.get(elem.name)?.color ?? DEFAULT_COLOR,
       );
     };
     this.categoryColorSet.onSet = async (color) => {
@@ -385,7 +387,7 @@ class App {
       this.tagsLoad();
     };
     this.tagCheckGroup.onfocus = (elem) => {
-      this.tagColorSet.set(this.colorindex.get(elem.name) ?? "#c0c0c0|#ffffff");
+      this.tagColorSet.set(this.colorindex.get(elem.name) ?? DEFAULT_COLOR);
     };
     this.tagColorSet.onSet = async (color) => {
       let tags = [...this.tagCheckData.select.keys()];
@@ -495,7 +497,7 @@ class App {
       );
       this.categoryCheckData.add(categoryCheck);
       this.categoryCheckGroup.add(categoryCheck);
-      const catecolor = cate.color ?? category[0]?.color ?? "#c0c0c0|#ffffff";
+      const catecolor = cate.color ?? category[0]?.color ?? DEFAULT_COLOR;
       this.applyColor(categoryCheck.elem, catecolor);
       this.ele.category.appendChild(categoryCheck.elem);
       cate.tags.forEach((tag) => {
@@ -549,7 +551,7 @@ class App {
   }
 
   getColor(name: string) {
-    return this.colorindex.get(name) ?? "#c0c0c0|#ffffff";
+    return this.colorindex.get(name) ?? DEFAULT_COLOR;
   }
 
   _updateURLState() {

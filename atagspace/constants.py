@@ -1,0 +1,7 @@
+TAG_NOMOVE = "⌀"
+TAG_IGNORE = "◌"
+TAG_AS_FILE = "◆"
+TAG_TODO = "●"
+TAG_TOREAD = "!待分类"
+
+DEFAULT_COLOR = "#C0C0C0|#FFFFFF"
