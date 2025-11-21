@@ -5,7 +5,7 @@ import re
 import glob
 import logging
 
-from .db import File, Source
+from .db import File, Source, sqlite_db
 from . import checker
 from . import category
 from .constants import TAG_TODO
@@ -243,22 +243,24 @@ def update_new(full: bool = False) -> None:
     tocheck: list[ListFile | File] = []
     newcheck: list[ListFile] = []
 
-    File.mark_all_delete()
     filelist2: list[ListFile] = []
-    # 文件已经记录(path+name)？更新记录
-    with alive_bar(len(filelist), title="Update") as bar:
-        for file in filelist:
-            # bar.text(file.path + file.name)
-            existing = File.reuse_get_path_name(file.path, file.name)
-            if existing is not None:
-                checksum = checker.check(file, cache_only=True)
-                update_file_listfile(existing, file, checksum)
-                if not existing.is_dir and existing.checksum is None:
-                    if full or existing.tags:
-                        tocheck.append(existing)
-            else:
-                filelist2.append(file)
-            bar()
+    # 这里设置事务锁住是为了防止看到只更新一半的文件
+    with sqlite_db:
+        File.mark_all_delete()
+        # 文件已经记录(path+name)？更新记录
+        with alive_bar(len(filelist), title="Update") as bar:
+            for file in filelist:
+                # bar.text(file.path + file.name)
+                existing = File.reuse_get_path_name(file.path, file.name)
+                if existing is not None:
+                    checksum = checker.check(file, cache_only=True)
+                    update_file_listfile(existing, file, checksum)
+                    if not existing.is_dir and existing.checksum is None:
+                        if full or existing.tags:
+                            tocheck.append(existing)
+                else:
+                    filelist2.append(file)
+                bar()
 
     # 否则，查找相同的文件(dev+ino)
     filelist = filelist2
