@@ -8,17 +8,12 @@ from .. import tagfile
 log = logging.getLogger(__name__)
 
 
-class NoCopyError(Exception):
-    """
-    不复制文件，仅移动文件
-    """
-
-
 def nocopy(src: str, dst: str) -> None:
     """
-    不复制文件，仅移动文件
+    通过复制文件，来移动文件
     """
-    raise NoCopyError(f"try to copy {src} to {dst}")
+    log.info(f"Move by copy: copying {src} to {dst}")
+    shutil.copy2(src, dst)
 
 
 def automove(
@@ -115,11 +110,13 @@ def automove(
                         log.info(f" match {filter_}")
                         log.info("")
                         try:
+                            if dpath.exists():
+                                raise FileExistsError(f"file {dpath} already exists")
                             dpath.parent.mkdir(parents=True, exist_ok=True)
                             shutil.move(fpath, dpath, copy_function=nocopy)
                             tagfile.move_file(file.id, dest, None)
                         except Exception as err:
-                            log.error(f"failed to move {fpath}: ({err})")
+                            log.error(f"Failed to move {fpath}: ({err})")
                 break
             if file_missed and mark_missed:
                 if dry_run:
