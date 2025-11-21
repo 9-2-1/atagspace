@@ -4,7 +4,7 @@ Extension commands for atagspace CLI.
 
 import typer
 
-from ..extensions import totag, sorttag, tagspaces
+from ..extensions import totag, sorttag, tagspaces, automove
 
 extension_cli = typer.Typer(help="扩展命令")
 
@@ -32,6 +32,20 @@ def extension_sorttag(path: str = typer.Argument("", help="路径")):
     """排序标记"""
     sort_count = sorttag.sorttag(path)
     typer.echo(f"排序完成 {sort_count} 个文件")
+
+
+@extension_cli.command("automove")
+def extension_automove(
+    path: str = typer.Argument("", help="路径"),
+    moverule: str = typer.Option(..., "-m", "--moverule", help="移动规则文件"),
+    dry_run: bool = typer.Option(False, "-d", "--dry-run", help="模拟运行"),
+    mark_missed: bool = typer.Option(
+        False, "-M", "--mark-missed", help="标记未匹配文件"
+    ),
+):
+    """根据规则移动文件"""
+    moved_count = automove.automove(path, moverule, dry_run, mark_missed)
+    typer.echo(f"移动完成 {moved_count} 个文件")
 
 
 @extension_cli.command("tagspaces")

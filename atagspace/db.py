@@ -183,6 +183,13 @@ class File:
         sqlite_db.commit()
 
     @staticmethod
+    def exists(path: str, name: str) -> bool:
+        row = sqlite_db.execute(
+            "SELECT 1 FROM file WHERE path = ? AND name = ?", (path, name)
+        ).fetchone()
+        return row is not None
+
+    @staticmethod
     def reuse_get_path_name(path: str, name: str) -> "File | None":
         row = sqlite_db.execute(
             "SELECT * FROM file WHERE path = ? AND name = ?", (path, name)

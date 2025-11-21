@@ -67,8 +67,8 @@ def arglist(x: str) -> list[str] | None:
     return args if len(args) > 0 else None
 
 
-def apply_filter(filter_: list[str], file: File) -> tuple[bool, dict[str, set[str]]]:
-    group_match: dict[str, set[str]] = {}
+def apply_filter(filter_: list[str], file: File) -> tuple[bool, dict[str, list[str]]]:
+    group_match: dict[str, list[str]] = {}
 
     def test_filter(arg: str, disable_sym: bool = False) -> bool:
         if arg[0] == arg[-1] == '"':
@@ -94,7 +94,7 @@ def apply_filter(filter_: list[str], file: File) -> tuple[bool, dict[str, set[st
                 # in cate
                 for tag in file.tags.split(" "):
                     if category.get_category_name(tag) == arg[1:]:
-                        group_match.setdefault("cate", set()).add(tag)
+                        group_match.setdefault(arg[1:], []).append(tag)
                         return True
                 return False
             elif arg[0] == "!":
@@ -110,7 +110,10 @@ def apply_filter(filter_: list[str], file: File) -> tuple[bool, dict[str, set[st
 
 
 def list_file(
-    path: str, filter_: list[str] | None = None, recurse: bool = False, limit: int = 1000
+    path: str,
+    filter_: list[str] | None = None,
+    recurse: bool = False,
+    limit: int = 1000,
 ) -> list[File]:
     path = path_normalize(path)
     if recurse:
@@ -125,6 +128,34 @@ def list_file(
     return files
 
 
+def create_file(file: ListFile, checksum: str | None, tags: str = TAG_TODO) -> None:
+    File.add(
+        path=file.path,
+        name=file.name,
+        size=file.size,
+        mtime=file.mtime,
+        dev=file.dev,
+        ino=file.ino,
+        is_dir=file.is_dir,
+        checksum=checksum,
+        tags=tags,
+    )
+
+
+def update_file_listfile(
+    file: File, listfile: ListFile | File, checksum: str | None
+) -> None:
+    file.path = listfile.path
+    file.name = listfile.name
+    file.size = listfile.size
+    file.mtime = listfile.mtime
+    file.dev = listfile.dev
+    file.ino = listfile.ino
+    file.is_dir = listfile.is_dir
+    file.checksum = checksum
+    file.self_update()
+
+
 def i64(x: int) -> int:
     x = x & 0xFFFFFFFFFFFFFFFF
     if x >= 0x8000000000000000:
@@ -137,6 +168,24 @@ def rename_file(id_: int, name: str) -> None:
 
 
 def move_file(id_: int, path: str | None, name: str | None) -> None:
+    # create parent paths in database
+    if path is not None:
+        parts = [p for p in path.split("/") if p != ""]
+        path = "/"
+        for p in parts:
+            if not File.exists(path=path, name=p):
+                File.add(
+                    path=path,
+                    name=p,
+                    size=0,
+                    mtime=0,
+                    dev=0,
+                    ino=0,
+                    is_dir=True,
+                    checksum=None,
+                    tags="",
+                )
+            path += p + "/"
     File.set_path_name(id_, path, name)
 
 
@@ -160,7 +209,7 @@ def update_new(full: bool = False) -> None:
                     )
                 )
             except Exception as err:
-                log.error(f"{path}: {err}")
+                log.error(f"Error stat {path}: {err}")
             bar()
 
         for source in Source.list():
@@ -191,32 +240,6 @@ def update_new(full: bool = False) -> None:
                 for fn in fs:
                     perfile(path, p / fn, False)
 
-    def create_file(file: ListFile, checksum: str | None, tags: str = TAG_TODO) -> None:
-        File.add(
-            path=file.path,
-            name=file.name,
-            size=file.size,
-            mtime=file.mtime,
-            dev=file.dev,
-            ino=file.ino,
-            is_dir=file.is_dir,
-            checksum=checksum,
-            tags=tags,
-        )
-
-    def update_existing(
-        existing: File, file: ListFile | File, checksum: str | None
-    ) -> None:
-        existing.path = file.path
-        existing.name = file.name
-        existing.size = file.size
-        existing.mtime = file.mtime
-        existing.dev = file.dev
-        existing.ino = file.ino
-        existing.is_dir = file.is_dir
-        existing.checksum = checksum
-        existing.self_update()
-
     tocheck: list[ListFile | File] = []
     newcheck: list[ListFile] = []
 
@@ -229,7 +252,7 @@ def update_new(full: bool = False) -> None:
             existing = File.reuse_get_path_name(file.path, file.name)
             if existing is not None:
                 checksum = checker.check(file, cache_only=True)
-                update_existing(existing, file, checksum)
+                update_file_listfile(existing, file, checksum)
                 if not existing.is_dir and existing.checksum is None:
                     if full or existing.tags:
                         tocheck.append(existing)
@@ -255,7 +278,7 @@ def update_new(full: bool = False) -> None:
                 else:
                     log.info(f"Move: {existing.path}{existing.name}")
                     log.info(f"   -> {file.path}{file.name}")
-                    update_existing(existing, file, checksum)
+                    update_file_listfile(existing, file, checksum)
                 if not existing.is_dir and existing.checksum is None:
                     if full or existing.tags:
                         tocheck.append(existing)
@@ -288,7 +311,7 @@ def update_new(full: bool = False) -> None:
                         else:
                             log.info(f"Move: {existing.path}{existing.name}")
                             log.info(f"   -> {file.path}{file.name}")
-                            update_existing(existing, file, checksum)
+                            update_file_listfile(existing, file, checksum)
                     else:
                         create_file(file, checksum)
             else:
@@ -306,7 +329,7 @@ def update_new(full: bool = False) -> None:
             existing = File.reuse_get_path_name(file.path, file.name)
             assert existing is not None
             checksum = checker.check(file)
-            update_existing(existing, file, checksum)
+            update_file_listfile(existing, file, checksum)
             bar(file.size)
         for file in newcheck:
             bar.text(file.path + file.name)
@@ -323,7 +346,7 @@ def update_new(full: bool = False) -> None:
                 else:
                     log.info(f"Move: {existing.path}{existing.name}")
                     log.info(f"   -> {file.path}{file.name}")
-                    update_existing(existing, file, checksum)
+                    update_file_listfile(existing, file, checksum)
             else:
                 create_file(file, checksum)
             bar(file.size)

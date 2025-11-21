@@ -33,5 +33,5 @@ def check(file: "tagfile.ListFile|File", cache_only: bool = False) -> str | None
             )
             return digest.hexdigest()
         except Exception as e:
-            log.error(f"Error checking {realpath}: {e}")
+            log.error(f"Error check {realpath}: {e}")
             return None

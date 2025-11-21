@@ -178,16 +178,22 @@ def tagspaces_export(path: str, dry_run: bool = False, singlefile: bool = False)
                     newname = tagspaces_tags_apply_rename(realname, new_tags)
                 if newname != file.name:
                     if dry_run:
-                        log.info(f"would rename {fpath}")
+                        log.info(f"would rename {file.path + file.name}")
+                        log.info(f"  (realpath) {fpath}")
+                        log.info(f"        from {file.name}")
                         log.info(f"          to {newname}")
+                        log.info("")
                     else:
                         try:
-                            log.info(f"rename {fpath}")
-                            log.info(f"    to {newname}")
+                            log.info(f"    rename {file.path + file.name}")
+                            log.info(f"(realpath) {fpath}")
+                            log.info(f"      from {file.name}")
+                            log.info(f"        to {newname}")
+                            log.info("")
                             fpath.rename(fpath.with_name(newname))
                             tagfile.rename_file(file.id, newname)
-                        except Exception:
-                            log.warning(f"failed to rename {fpath} to {newname}")
+                        except Exception as err:
+                            log.warning(f"failed to rename {fpath} ({err})")
                     finish_count += 1
 
     walk(path)
