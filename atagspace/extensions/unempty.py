@@ -23,7 +23,7 @@ def rmtree_onexc(
 
     Usage: ``shutil.rmtree(path, onexc=rmtree_onexc)``
     """
-    if not os.access(path, os.W_OK, follow_symlinks=False):
+    if not os.access(path, os.W_OK):
         os.chmod(path, stat.S_IWUSR)  # Add write permission
         func(path)  # Retry deletion
     else:
@@ -37,8 +37,7 @@ def rmdir(file: File):
         shutil.rmtree(rpath / ".ts", onexc=lambda x, y, z: None)
     if rpath.exists():
         log.info(f"Removing empty {rpath}")
-        if not os.access(rpath, os.W_OK, follow_symlinks=False):
-            rpath.chmod(stat.S_IWUSR)  # Add write permission
+        rpath.chmod(stat.S_IWUSR)  # Add write permission
         rpath.rmdir()
     File.mark_delete(file.path, file.name)
 
