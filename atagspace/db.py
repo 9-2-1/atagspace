@@ -144,6 +144,21 @@ class File:
         sqlite_db.commit()
 
     @staticmethod
+    def mark_delete(path: str, name: str) -> None:
+        sqlite_db.execute(
+            "UPDATE file SET deltime = ? WHERE path = ? AND name = ? AND deltime IS NULL",
+            (time.time(), path, name),
+        )
+        path_name = path + name
+        path_lower_bound = path_name + "/"
+        path_upper_bound = path_name + chr(ord("/") + 1)
+        sqlite_db.execute(
+            "UPDATE file SET deltime = ? WHERE path >= ? AND path < ? AND deltime IS NULL",
+            (time.time(), path_lower_bound, path_upper_bound),
+        )
+        sqlite_db.commit()
+
+    @staticmethod
     def add(
         path: str,
         name: str,
