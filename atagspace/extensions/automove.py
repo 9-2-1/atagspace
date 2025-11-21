@@ -4,11 +4,12 @@ import shutil
 
 from ..constants import TAG_NOMOVE, TAG_IGNORE, TAG_AS_FILE, TAG_TODO
 from .. import tagfile
+from .unempty import rmtree_onexc
 
 log = logging.getLogger(__name__)
 
 
-def nocopy(src: str, dst: str) -> None:
+def move_by_copy(src: str, dst: str) -> None:
     """
     通过复制文件，来移动文件
     """
@@ -113,7 +114,18 @@ def automove(
                             if dpath.exists():
                                 raise FileExistsError(f"file {dpath} already exists")
                             dpath.parent.mkdir(parents=True, exist_ok=True)
-                            shutil.move(fpath, dpath, copy_function=nocopy)
+                            try:
+                                fpath.rename(dpath)
+                            except Exception as err:
+                                # 这里的设计是，移动失败后尝试复制。即使复制后的清理失败，数据库照常更新。
+                                log.info(f"Move by copy: ({err})")
+                                shutil.copytree(
+                                    fpath, dpath, copy_function=move_by_copy
+                                )
+                                try:
+                                    shutil.rmtree(fpath, onexc=rmtree_onexc)
+                                except Exception as err:
+                                    log.error(f"Failed to remove {fpath}: ({err})")
                             tagfile.move_file(file.id, dest, None)
                         except Exception as err:
                             log.error(f"Failed to move {fpath}: ({err})")
