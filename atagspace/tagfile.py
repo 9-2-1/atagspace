@@ -256,7 +256,7 @@ def update_new(full: bool = False) -> None:
                     checksum = checker.check(file, cache_only=True)
                     update_file_listfile(existing, file, checksum)
                     if not existing.is_dir and existing.checksum is None:
-                        if full or existing.tags:
+                        if full or existing.tags != "":
                             tocheck.append(existing)
                 else:
                     filelist2.append(file)
