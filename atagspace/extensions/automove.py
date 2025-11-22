@@ -1,6 +1,7 @@
 from pathlib import Path
 import logging
 import shutil
+import stat
 
 from ..constants import TAG_NOMOVE, TAG_IGNORE, TAG_AS_FILE, TAG_TODO
 from .. import tagfile
@@ -119,13 +120,23 @@ def automove(
                             except Exception as err:
                                 # 这里的设计是，移动失败后尝试复制。即使复制后的清理失败，数据库照常更新。
                                 log.info(f"Move by copy: ({err})")
-                                shutil.copytree(
-                                    fpath, dpath, copy_function=move_by_copy
-                                )
-                                try:
-                                    shutil.rmtree(fpath, onexc=rmtree_onexc)
-                                except Exception as err:
-                                    log.error(f"Failed to remove {fpath}: ({err})")
+                                if file.is_dir:
+                                    shutil.copytree(
+                                        fpath, dpath, copy_function=move_by_copy
+                                    )
+                                    try:
+                                        shutil.rmtree(fpath, onexc=rmtree_onexc)
+                                    except Exception as err:
+                                        log.error(f"Failed to remove {fpath}: ({err})")
+                                else:
+                                    move_by_copy(str(fpath), str(dpath))
+                                    try:
+                                        fpath.chmod(
+                                            stat.S_IWUSR
+                                        )  # Add write permission
+                                        fpath.unlink()
+                                    except Exception as err:
+                                        log.error(f"Failed to remove {fpath}: ({err})")
                             tagfile.move_file(file.id, dest, None)
                         except Exception as err:
                             log.error(f"Failed to move {fpath}: ({err})")
