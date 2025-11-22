@@ -8,7 +8,7 @@ import logging
 from .db import File, Source, sqlite_db
 from . import checker
 from . import category
-from .constants import TAG_TODO
+from .constants import TAG_TODO, TAG_AS_FILE
 
 from alive_progress import alive_bar, config_handler
 
@@ -107,6 +107,10 @@ def apply_filter(filter_: list[str], file: File) -> tuple[bool, dict[str, list[s
             return False, {}
 
     return True, group_match
+
+
+def has_normal_tag(tags: str) -> bool:
+    return TAG_TODO not in tags.split(" ") and TAG_AS_FILE not in tags.split(" ")
 
 
 def list_file(
@@ -256,7 +260,7 @@ def update_new(full: bool = False) -> None:
                     checksum = checker.check(file, cache_only=True)
                     update_file_listfile(existing, file, checksum)
                     if not existing.is_dir and existing.checksum is None:
-                        if full or existing.tags != "":
+                        if full or has_normal_tag(existing.tags):
                             tocheck.append(existing)
                 else:
                     filelist2.append(file)
