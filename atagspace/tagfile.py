@@ -1,3 +1,4 @@
+from typing import TypeAlias
 from pathlib import Path
 from dataclasses import dataclass
 import time
@@ -49,64 +50,222 @@ def tag_file_change(id_: int, adds: list[str], removes: list[str]) -> None:
     File.set_tags(id_, tags)
 
 
-def arglist(x: str) -> list[str] | None:
+# 类型定义说明
+Condition: TypeAlias = "str | Expression"  # +aaa +bbb (*.bmp | *.png)
+AndConditions = list[Condition]  # +aaa +bbb +ccc
+OrConditions = list[AndConditions]  # ...|...|...
+Expression = OrConditions
+
+
+def arglist(x: str) -> Expression:
+    """解析表达式字符串，返回结构化的Expression
+
+    返回格式: list[list] - 外层list代表OrConditions，内层list代表AndConditions
+    嵌套的list[list]表示括号内的子表达式
+    """
+    # 首先进行基础的空格分割，保留引号内的内容
     quoted = False
     v = ""
-    args: list[str] = []
+    tokens: list[str] = []
     for i in x:
         if i == '"':
             quoted = not quoted
-        if i == " " and not quoted:
+            v += i
+        elif i == " " and not quoted:
             if v != "":
-                args.append(v)
+                tokens.append(v)
                 v = ""
         else:
             v += i
     if v != "":
-        args.append(v)
-    return args if len(args) > 0 else None
+        tokens.append(v)
+
+    # 解析结构化表达式
+    def parse_expression(
+        tokens: list[str], start_idx: int = 0
+    ) -> tuple[OrConditions, int]:
+        """解析表达式，返回OrConditions结构和结束索引"""
+        or_conditions: OrConditions = []
+        and_conditions: AndConditions = []
+        i = start_idx
+
+        while i < len(tokens):
+            token = tokens[i]
+
+            # 处理左括号，递归解析子表达式
+            if token == "(":
+                # 找到匹配的右括号
+                bracket_depth = 1
+                j = i + 1
+                while j < len(tokens) and bracket_depth > 0:
+                    if tokens[j] == "(":
+                        bracket_depth += 1
+                    elif tokens[j] == ")":
+                        bracket_depth -= 1
+                    j += 1
+
+                # 递归解析括号内的表达式
+                if j <= len(tokens):
+                    sub_expression, _ = parse_expression(tokens, i + 1)
+                    # 检查是否有实际内容
+                    if sub_expression and any(sub_expression):
+                        and_conditions.append(sub_expression)
+                i = j
+
+            # 处理右括号，结束当前表达式解析
+            elif token == ")":
+                if and_conditions:
+                    or_conditions.append(and_conditions)
+                return or_conditions, i + 1
+
+            # 处理或运算符
+            elif token == "|":
+                if and_conditions:
+                    or_conditions.append(and_conditions)
+                    and_conditions = []
+                i += 1
+
+            # 处理普通条件
+            else:
+                and_conditions.append(token)
+                i += 1
+
+        # 添加最后一组AND条件
+        if and_conditions:
+            or_conditions.append(and_conditions)
+
+        return or_conditions, i
+
+    # 解析整个表达式
+    expression, _ = parse_expression(tokens)
+    return expression
 
 
-def apply_filter(filter_: list[str], file: File) -> tuple[bool, dict[str, list[str]]]:
+def evaluate_condition(
+    cond: Condition, file: File
+) -> tuple[bool, dict[str, list[str]]]:
+    """
+    评估单个条件
+
+    参数:
+    - cond: 条件，可以是字符串或嵌套表达式
+    - file: 要过滤的文件对象
+
+    返回:
+    - tuple[bool, dict[str, list[str]]]: (是否匹配成功, 匹配的组)
+    """
+    # 如果是嵌套表达式（列表），调用evaluate_or_group
+    if isinstance(cond, list):
+        return evaluate_or_group(cond, file)
+    # 否则是字符串条件，调用test_filter
+    else:
+        group_match: dict[str, list[str]] = {}
+        result = test_filter(cond, file, group_match=group_match)
+        return result, group_match
+
+
+def evaluate_and_group(
+    conditions: AndConditions, file: File
+) -> tuple[bool, dict[str, list[str]]]:
+    """
+    评估AND条件组（所有条件必须满足）
+
+    参数:
+    - conditions: AND条件组
+    - file: 要过滤的文件对象
+
+    返回:
+    - tuple[bool, dict[str, list[str]]]: (是否匹配成功, 匹配的组)
+    """
     group_match: dict[str, list[str]] = {}
 
-    def test_filter(arg: str, disable_sym: bool = False) -> bool:
-        if arg[0] == arg[-1] == '"':
-            return test_filter(arg[1:-1], True)
-        if disable_sym:
-            if "*" in arg or "?" in arg or ("[" in arg and "]" in arg):
-                regex = glob.translate(arg, recursive=True, include_hidden=True)
-                if "/" in arg:
-                    return (
-                        re.match(regex, file.path + file.name, re.IGNORECASE)
-                        is not None
-                    )
-                else:
-                    return re.match(regex, file.name, re.IGNORECASE) is not None
-            else:
-                return arg.lower() in file.name.lower()
-        else:
-            if arg[0] == "+":
-                return arg[1:] in file.tags.split(" ")
-            elif arg[0] == "-":
-                return arg[1:] not in file.tags.split(" ")
-            elif arg[0] == "~":
-                # in cate
-                for tag in file.tags.split(" "):
-                    if category.get_category_name(tag) == arg[1:]:
-                        group_match.setdefault(arg[1:], []).append(tag)
-                        return True
-                return False
-            elif arg[0] == "!":
-                return not test_filter(arg[1:], True)
-            else:
-                return test_filter(arg, True)
-
-    for arg in filter_:
-        if not test_filter(arg):
+    for cond in conditions:
+        result, sub_match = evaluate_condition(cond, file)
+        if not result:
             return False, {}
+        # 合并group_match
+        for group, tags in sub_match.items():
+            if group not in group_match:
+                group_match[group] = []
+            group_match[group].extend(tags)
 
     return True, group_match
+
+
+def evaluate_or_group(
+    expression: OrConditions, file: File
+) -> tuple[bool, dict[str, list[str]]]:
+    """
+    评估OR条件组（任一AND条件组满足即可）
+
+    参数:
+    - expression: OR条件组
+    - file: 要过滤的文件对象
+
+    返回:
+    - tuple[bool, dict[str, list[str]]]: (是否匹配成功, 匹配的组)
+    """
+    for and_group in expression:
+        result, group_match = evaluate_and_group(and_group, file)
+        if result:
+            return True, group_match
+
+    return False, {}
+
+
+# 将apply_filter设置为evaluate_or_group的别名
+apply_filter = evaluate_or_group
+
+
+def test_filter(
+    arg: str,
+    file: File,
+    disable_sym: bool = False,
+    group_match: dict[str, list[str]] | None = None,
+) -> bool:
+    """
+    测试单个条件是否满足
+
+    参数:
+    - arg: 条件字符串
+    - file: 要测试的文件对象
+    - disable_sym: 是否禁用特殊符号处理
+    - group_match: 用于收集匹配的分类标签
+
+    返回:
+    - bool: 条件是否满足
+    """
+    if group_match is None:
+        group_match = {}
+
+    if arg[0] == arg[-1] == '"':
+        return test_filter(arg[1:-1], file, True, group_match)
+
+    if disable_sym:
+        if "*" in arg or "?" in arg or ("[" in arg and "]" in arg):
+            regex = glob.translate(arg, recursive=True, include_hidden=True)
+            if "/" in arg:
+                return re.match(regex, file.path + file.name, re.IGNORECASE) is not None
+            else:
+                return re.match(regex, file.name, re.IGNORECASE) is not None
+        else:
+            return arg.lower() in file.name.lower()
+    else:
+        if arg[0] == "+":
+            return arg[1:] in file.tags.split(" ")
+        elif arg[0] == "-":
+            return arg[1:] not in file.tags.split(" ")
+        elif arg[0] == "~":
+            # in cate
+            for tag in file.tags.split(" "):
+                if category.get_category_name(tag) == arg[1:]:
+                    group_match.setdefault(arg[1:], []).append(tag)
+                    return True
+            return False
+        elif arg[0] == "!":
+            return not test_filter(arg[1:], file, True, group_match)
+        else:
+            return test_filter(arg, file, True, group_match)
 
 
 def has_normal_tag(tags: str) -> bool:
@@ -115,7 +274,7 @@ def has_normal_tag(tags: str) -> bool:
 
 def list_file(
     path: str,
-    filter_: list[str] | None = None,
+    filter_: OrConditions | None = None,
     recurse: bool = False,
     limit: int = 1000,
 ) -> list[File]:
