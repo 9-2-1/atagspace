@@ -80,6 +80,9 @@ def arglist(x: str) -> Expression:
     if v != "":
         tokens.append(v)
 
+    if len(tokens) == 0:
+        return [[]]  # 这是有一个空的 AndConditions 的 OrConditions，代表匹配所有文件
+
     # 解析结构化表达式
     def parse_expression(
         tokens: list[str], start_idx: int = 0
