@@ -2,24 +2,63 @@
 +!难下载 = /下载/难下载
 ~常用 = /OneDrive/常用/{常用}
 
+# Pictures / Videos
+
+( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~常用-负面 = /Saved Pictures/常用-负面/{常用-负面}
+( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~负面-争议话题 = /Saved Pictures/负面-争议话题/{负面-争议话题}
+( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~负面-推广 = /Saved Pictures/负面-推广/{负面-推广}
+( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~负面-观猴 = /Saved Pictures/负面-观猴/{负面-观猴}
+( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~负面-锤人 = /Saved Pictures/负面-锤人/{负面-锤人}
+( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~高中-负面 = /Saved Pictures/高中-负面/{高中-负面}
+( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~负面事件 = /Saved Pictures/负面事件/{负面事件}
+( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~事件 = /Saved Pictures/事件/{事件}
+( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~纪念-CTF = /Saved Pictures/纪念-CTF/{纪念-CTF}
+( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~纪念-Scratch = /Saved Pictures/纪念-Scratch/{纪念-Scratch}
+( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~纪念-Scratch-负面 = /Saved Pictures/纪念-Scratch-负面/{纪念-Scratch-负面}
+( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~纪念-种子杯 = /Saved Pictures/纪念-种子杯/{纪念-种子杯}
+( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~纪念-其他编程 = /Saved Pictures/纪念-其他编程/{纪念-其他编程}
+( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~大学 = /Saved Pictures/大学/{大学}
+( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~高中 = /Saved Pictures/高中/{高中}
+( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~娱乐-动画 = /Saved Pictures/娱乐-动画/{娱乐-动画}
+( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~娱乐-游戏 = /Saved Pictures/娱乐-游戏/{娱乐-游戏}
+( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~娱乐-动画推荐 = /Saved Pictures/娱乐-动画推荐/{娱乐-动画推荐}
+( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~娱乐-游戏推荐 = /Saved Pictures/娱乐-游戏推荐/{娱乐-游戏推荐}
+( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~娱乐-漫画推荐 = /Saved Pictures/娱乐-漫画推荐/{娱乐-漫画推荐}
+( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~娱乐-故事推荐 = /Saved Pictures/娱乐-故事推荐/{娱乐-故事推荐}
+( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~应用推荐 = /Saved Pictures/应用推荐/{应用推荐}
+( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~娱乐-up = /Saved Pictures/娱乐-up/{娱乐-up}
+( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~主题 = /Saved Pictures/主题/{主题}
+( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~主题-计算机 = /Saved Pictures/主题-计算机/{主题-计算机}
+( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~搞笑合集 = /Saved Pictures/搞笑合集/{搞笑合集}
+( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~应用 = /Saved Pictures/应用/{应用}
+( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~特别 = /Saved Pictures/特别/{特别}
+( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~字体 = /Saved Pictures/字体/{字体}
+
+
+( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ( +!优先-1 | +!奇葩-1 | +!搞笑-1 | +!抽象-1 | +!优秀-1 | +!封神-1 ) = /Saved Pictures/!精选/
+
+( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) +!待分类 = /Saved Pictures/!待分类
+( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) +!待更新 = /Saved Pictures/!待更新
+( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) +!待阅读 = /Saved Pictures/!待阅读
+( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) +!持续关注 = /Saved Pictures/!持续关注
+
+# Other
+
 ~常用-负面 = /下载/常用-负面/{常用-负面}
 ~负面-争议话题 = /下载/负面-争议话题/{负面-争议话题}
 ~负面-推广 = /下载/负面-推广/{负面-推广}
 ~负面-观猴 = /下载/负面-观猴/{负面-观猴}
 ~负面-锤人 = /下载/负面-锤人/{负面-锤人}
-~高中-负面 = /下载/负面-高中/{高中-负面}
-
+~高中-负面 = /下载/高中-负面/{高中-负面}
 ~负面事件 = /下载/负面事件/{负面事件}
 ~事件 = /下载/事件/{事件}
-
 ~纪念-CTF = /下载/纪念-CTF/{纪念-CTF}
 ~纪念-Scratch = /下载/纪念-Scratch/{纪念-Scratch}
 ~纪念-Scratch-负面 = /下载/纪念-Scratch-负面/{纪念-Scratch-负面}
 ~纪念-种子杯 = /下载/纪念-种子杯/{纪念-种子杯}
 ~纪念-其他编程 = /下载/纪念-其他编程/{纪念-其他编程}
-~大学 = /下载/纪念-大学/{大学}
-~高中 = /下载/纪念-高中/{高中}
-
+~大学 = /下载/大学/{大学}
+~高中 = /下载/高中/{高中}
 ~娱乐-动画 = /下载/娱乐-动画/{娱乐-动画}
 ~娱乐-游戏 = /下载/娱乐-游戏/{娱乐-游戏}
 ~娱乐-动画推荐 = /下载/娱乐-动画推荐/{娱乐-动画推荐}
@@ -28,29 +67,22 @@
 ~娱乐-故事推荐 = /下载/娱乐-故事推荐/{娱乐-故事推荐}
 ~应用推荐 = /下载/应用推荐/{应用推荐}
 ~娱乐-up = /下载/娱乐-up/{娱乐-up}
-
 ~主题 = /下载/主题/{主题}
-~搞笑合集 = /下载/主题/搞笑/{搞笑合集}
 ~主题-计算机 = /下载/主题-计算机/{主题-计算机}
-
+~搞笑合集 = /下载/搞笑合集/{搞笑合集}
 ~应用 = /下载/应用/{应用}
 ~特别 = /下载/特别/{特别}
 ~字体 = /下载/字体/{字体}
 
-+!优先-1 = /下载/!精选/
-+!奇葩-1 = /下载/!精选/
-+!搞笑-1 = /下载/!精选/
-+!抽象-1 = /下载/!精选/
-+!优秀-1 = /下载/!精选/
-+!封神-1 = /下载/!精选/
+
+( +!优先-1 | +!奇葩-1 | +!搞笑-1 | +!抽象-1 | +!优秀-1 | +!封神-1 ) = /下载/!精选/
 
 +!待分类 = /下载/!待分类
 +!待更新 = /下载/!待更新
 +!待阅读 = /下载/!待阅读
 +!持续关注 = /下载/!持续关注
-+!难下载 = /下载/!难下载
 
 +!不安全 = /下载/!不安全
 +!不重要 = /下载/!不重要
-
 +!准备删除 = /下载/!准备删除
+
