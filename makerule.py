@@ -4,8 +4,8 @@ with open("moverule.txt", "w", encoding="utf-8") as f:
     stdout = sys.stdout
     sys.stdout = f
     tags = (
-        "常用-负面 负面-争议话题 负面-推广 负面-观猴 负面-锤人 高中-负面 负面事件 事件 纪念-CTF"
-        " 纪念-Scratch 纪念-Scratch-负面 纪念-种子杯 纪念-其他编程 大学 高中 娱乐-动画 娱乐-游戏"
+        "常用-负面 负面-争议话题 负面-推广 负面-观猴 负面-锤人 负面-高中 负面事件 事件 纪念-CTF"
+        " 纪念-Scratch 纪念-Scratch-负面 纪念-种子杯 纪念-其他编程 纪念-大学 纪念-高中 娱乐-动画 娱乐-游戏"
         " 娱乐-动画推荐 娱乐-游戏推荐 娱乐-漫画推荐 娱乐-故事推荐 应用推荐 娱乐-up 主题"
         " 主题-计算机 搞笑合集 应用 特别 字体"
     ).split(" ")
@@ -15,6 +15,7 @@ with open("moverule.txt", "w", encoding="utf-8") as f:
 +!重要文件 = /OneDrive/重要文件
 +!难下载 = /下载/难下载
 ~常用 = /OneDrive/常用/{常用}
+~重要-证书 = /OneDrive/重要-证书/
 """
     )
 

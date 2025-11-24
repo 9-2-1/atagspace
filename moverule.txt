@@ -1,6 +1,7 @@
 +!重要文件 = /OneDrive/重要文件
 +!难下载 = /下载/难下载
 ~常用 = /OneDrive/常用/{常用}
+~重要-证书 = /OneDrive/重要-证书/
 
 # Pictures / Videos
 
@@ -9,7 +10,7 @@
 ( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~负面-推广 = /Saved Pictures/负面-推广/{负面-推广}
 ( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~负面-观猴 = /Saved Pictures/负面-观猴/{负面-观猴}
 ( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~负面-锤人 = /Saved Pictures/负面-锤人/{负面-锤人}
-( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~高中-负面 = /Saved Pictures/高中-负面/{高中-负面}
+( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~负面-高中 = /Saved Pictures/负面-高中/{负面-高中}
 ( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~负面事件 = /Saved Pictures/负面事件/{负面事件}
 ( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~事件 = /Saved Pictures/事件/{事件}
 ( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~纪念-CTF = /Saved Pictures/纪念-CTF/{纪念-CTF}
@@ -17,8 +18,8 @@
 ( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~纪念-Scratch-负面 = /Saved Pictures/纪念-Scratch-负面/{纪念-Scratch-负面}
 ( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~纪念-种子杯 = /Saved Pictures/纪念-种子杯/{纪念-种子杯}
 ( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~纪念-其他编程 = /Saved Pictures/纪念-其他编程/{纪念-其他编程}
-( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~大学 = /Saved Pictures/大学/{大学}
-( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~高中 = /Saved Pictures/高中/{高中}
+( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~纪念-大学 = /Saved Pictures/纪念-大学/{纪念-大学}
+( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~纪念-高中 = /Saved Pictures/纪念-高中/{纪念-高中}
 ( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~娱乐-动画 = /Saved Pictures/娱乐-动画/{娱乐-动画}
 ( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~娱乐-游戏 = /Saved Pictures/娱乐-游戏/{娱乐-游戏}
 ( *.jpg | *.png | *.jpeg | *.gif | *.mp4 ) ~娱乐-动画推荐 = /Saved Pictures/娱乐-动画推荐/{娱乐-动画推荐}
@@ -49,7 +50,7 @@
 ~负面-推广 = /下载/负面-推广/{负面-推广}
 ~负面-观猴 = /下载/负面-观猴/{负面-观猴}
 ~负面-锤人 = /下载/负面-锤人/{负面-锤人}
-~高中-负面 = /下载/高中-负面/{高中-负面}
+~负面-高中 = /下载/负面-高中/{负面-高中}
 ~负面事件 = /下载/负面事件/{负面事件}
 ~事件 = /下载/事件/{事件}
 ~纪念-CTF = /下载/纪念-CTF/{纪念-CTF}
@@ -57,8 +58,8 @@
 ~纪念-Scratch-负面 = /下载/纪念-Scratch-负面/{纪念-Scratch-负面}
 ~纪念-种子杯 = /下载/纪念-种子杯/{纪念-种子杯}
 ~纪念-其他编程 = /下载/纪念-其他编程/{纪念-其他编程}
-~大学 = /下载/大学/{大学}
-~高中 = /下载/高中/{高中}
+~纪念-大学 = /下载/纪念-大学/{纪念-大学}
+~纪念-高中 = /下载/纪念-高中/{纪念-高中}
 ~娱乐-动画 = /下载/娱乐-动画/{娱乐-动画}
 ~娱乐-游戏 = /下载/娱乐-游戏/{娱乐-游戏}
 ~娱乐-动画推荐 = /下载/娱乐-动画推荐/{娱乐-动画推荐}
