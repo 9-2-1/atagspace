@@ -27,7 +27,7 @@ def automove(
     moved_count = 0
     with open(moverule, "r", encoding="utf-8") as f:
         rules = f.readlines()
-    rules_cooked: list[tuple[list[str] | None, str, str]] = []
+    rules_cooked: list[tuple[list[tagfile.AndConditions] | None, str, str]] = []
     for rule in rules:
         rule = rule.strip()
         if rule == "" or rule.startswith("#"):
