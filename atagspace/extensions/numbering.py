@@ -1,19 +1,19 @@
 import logging
+import aiohttp
+import asyncio
+from urllib.parse import escape
 
 log = logging.getLogger(__name__)
 
-import aiohttp
-import asyncio
 
-
-def send(category: str, count: int) -> None:
+def send(category: str, color: string, order: int, count: int) -> None:
 
     async def send() -> None:
         async with aiohttp.ClientSession() as session:
             with open("APPID.txt", "r") as f:
                 APPID = f.read().strip()
             async with session.post(
-                f"https://arigi.top/numberheaven/post_update?name={category}",
+                f"https://arigi.top/numberheaven/api/post_update?name={category}&color={escape(color)}&order={order}",
                 data=str(count).encode("utf-8"),
                 headers={"APPID": APPID},
             ) as resp:

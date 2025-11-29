@@ -62,6 +62,6 @@ def totag(
 
     walk(path)
     if send_number:
-        send("tagspaces", todo_count)
-        send("tagspaces_todo", toread_count)
+        send("tagspaces", "#ff0000", 2, todo_count)
+        send("tagspaces_todo", "#ff00ff", 2, toread_count)
     return todo_count, finish_count, toread_count

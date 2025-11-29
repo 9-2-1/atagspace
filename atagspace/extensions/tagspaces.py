@@ -166,6 +166,7 @@ def tagspaces_export(path: str, dry_run: bool = False, singlefile: bool = False)
             fpath = Path(tagfile.source_translate(file.path + file.name))
             new_tags = file.tags.split(" ")
             new_tags = [tag for tag in new_tags if tag not in BLOCKLIST and tag != ""]
+            new_tags = []
             if nomove:
                 if tagspaces_tags_apply_ts_json(fpath, new_tags, dry_run):
                     finish_count += 1
