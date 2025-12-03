@@ -4,6 +4,9 @@ import path from 'path';
 import morgan from 'morgan';
 import { init } from './db';
 
+import fileRouter from './api/file';
+import progressRouter from './api/progress';
+
 const app = express();
 const port = 4590;
 
@@ -14,10 +17,11 @@ app.use(cors());
 // 初始化数据库
 init();
 
-// 获取所有数字及其历史记录，按order和name排序
-app.get('/api/get_numbers', (req, res) => {
-  res.status(500).send('Internal Server Error');
-});
+// 使用文件路由
+app.use('/api/file', fileRouter);
+
+// 使用进度路由
+app.use('/api/progress', progressRouter);
 
 // Serve static files from the frontend dist directory
 app.use(express.static(path.join(__dirname, '../../dist')));
