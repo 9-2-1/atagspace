@@ -100,7 +100,8 @@
 
 <style>
   .progress-test {
-    max-width: 600px;
+    max-width: 1200px;
+    min-width: 80%;
     margin: 0 auto;
     padding: 20px;
     border: 1px solid #e0e0e0;

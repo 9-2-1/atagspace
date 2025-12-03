@@ -7,26 +7,32 @@
   import SplitHorizontal from './layout/SplitHorizontal.svelte';
   import Separator from './layout/Separator.svelte';
   import Flex from './layout/Flex.svelte';
+  const urlParams = new URLSearchParams(window.location.search);
+  const isTest = urlParams.has('test');
 </script>
 
 <main>
-  <SplitVertical>
-    <Flex x={1}>
-      <SplitHorizontal>
-        <Flex x={2}>
-          <Tags />
-        </Flex>
-        <Separator />
-        <Flex x={1}>
-          <Preview />
-        </Flex>
-      </SplitHorizontal>
-    </Flex>
-    <Separator />
-    <Flex x={3}>
-      <Explorer />
-    </Flex>
-  </SplitVertical>
+  {#if isTest}
+    <ProgressTest />
+  {:else}
+    <SplitVertical>
+      <Flex x={1}>
+        <SplitHorizontal>
+          <Flex x={2}>
+            <Tags />
+          </Flex>
+          <Separator />
+          <Flex x={1}>
+            <Preview />
+          </Flex>
+        </SplitHorizontal>
+      </Flex>
+      <Separator />
+      <Flex x={2}>
+        <Explorer />
+      </Flex>
+    </SplitVertical>
+  {/if}
 </main>
 
 <style>
