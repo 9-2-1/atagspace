@@ -3,10 +3,11 @@
   import Explorer from './component/Explorer.svelte';
   import Preview from './component/Preview.svelte';
   import ProgressTest from './component/ProgressTest.svelte';
-  import SplitVertical from './layout/SplitVertical.svelte';
-  import SplitHorizontal from './layout/SplitHorizontal.svelte';
-  import Separator from './layout/Separator.svelte';
-  import Flex from './layout/Flex.svelte';
+  import Category from './component/Category.svelte';
+  import Name from './component/Name.svelte';
+  import Navigation from './component/Navigation.svelte';
+  import StatusBar from './component/StatusBar.svelte';
+
   const urlParams = new URLSearchParams(window.location.search);
   const isTest = urlParams.has('test');
 </script>
@@ -15,27 +16,39 @@
   {#if isTest}
     <ProgressTest />
   {:else}
-    <SplitVertical>
-      <Flex x={1}>
-        <SplitHorizontal>
-          <Flex x={2}>
-            <Tags />
-          </Flex>
-          <Separator />
-          <Flex x={1}>
-            <Preview />
-          </Flex>
-        </SplitHorizontal>
-      </Flex>
-      <Separator />
-      <Flex x={2}>
-        <Explorer />
-      </Flex>
-    </SplitVertical>
+    <div class="page">
+      <div class="page-left">
+        <div>
+          <Category />
+        </div>
+        <div>
+          <Tags />
+        </div>
+      </div>
+      <div class="page-middle">
+        <div>
+          <Navigation />
+        </div>
+        <div>
+          <Explorer />
+        </div>
+        <div>
+          <StatusBar />
+        </div>
+      </div>
+      <div class="page-right">
+        <div>
+          <Name />
+        </div>
+        <div>
+          <Preview />
+        </div>
+      </div>
+    </div>
   {/if}
 </main>
 
-<style>
+<style lang="less">
   :global(*) {
     margin: 0;
     padding: 0;
@@ -43,11 +56,49 @@
   }
 
   main {
-    display: flex;
-    flex-direction: column;
-    justify-content: stretch;
-    align-items: stretch;
     width: 100vw;
     height: 100vh;
+  }
+
+  .grid() {
+    display: grid;
+    place-items: stretch;
+    place-content: stretch;
+    width: 100%;
+    height: 100%;
+  }
+
+  .page {
+    .grid();
+    grid-template-columns: 1fr 2fr 1fr;
+    grid-template-rows: 1fr;
+    > div {
+      border-right: 1px solid #e0e0e0;
+    }
+  }
+
+  .page-left {
+    .grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 2fr;
+    > div {
+      border-bottom: 1px solid #e0e0e0;
+    }
+  }
+  .page-middle {
+    .grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr auto;
+    > div {
+      border-bottom: 1px solid #e0e0e0;
+    }
+  }
+  .page-right {
+    .grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 3fr;
+    > div {
+      border-bottom: 1px solid #e0e0e0;
+    }
   }
 </style>

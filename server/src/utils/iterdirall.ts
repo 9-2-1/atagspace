@@ -1,4 +1,5 @@
 import fsP from 'fs/promises';
+import { cliprogress } from './cliproress.js';
 
 export default async function iterdirall(callback: (loc: string) => void, path: string) {
   try {
@@ -21,39 +22,32 @@ export default async function iterdirall(callback: (loc: string) => void, path: 
   }
 }
 
-/*
 export async function example() {
   const state: { list: number; stat: number } = { list: 0, stat: 0 };
-  const progress_bar = new progress<typeof state>(
-    state => `List ${state.list}, Stat ${state.stat}`,
-    100
+  await cliprogress(
+    state,
+    100,
+    async update => {
+      async function stat(loc: string) {
+        state.list++;
+        update(state);
+        try {
+          await fsP.stat(loc, { bigint: true });
+        } catch (error) {
+          console.error(`Error processing ${loc}:`, error);
+        }
+        state.stat++;
+        update(state);
+      }
+      const step2p: Promise<void>[] = [];
+      await iterdirall(loc => {
+        step2p.push(stat(loc));
+      }, 'F:/');
+      await Promise.all(step2p);
+      update(state);
+    },
+    state => `List ${state.list}, Stat ${state.stat}`
   );
-  function update_bar() {
-    progress_bar.update(state);
-  }
-
-  async function stat(loc: string) {
-    state.list++;
-    update_bar();
-    try {
-      await fsP.stat(loc, { bigint: true });
-    } catch (error) {
-      console.error(`Error processing ${loc}:`, error);
-    }
-    state.stat++;
-    update_bar();
-  }
-
-  const step2p: Promise<void>[] = [];
-  await iterdirall(loc => {
-    step2p.push(stat(loc));
-  }, 'F:/');
-
-  await Promise.all(step2p);
-
-  progress_bar.update(state);
-  progress_bar.end();
 }
 
 example();
-*/
