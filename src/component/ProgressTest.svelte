@@ -90,10 +90,9 @@
         <div class="message">
           {message}
         </div>
-      {/each}
-      {#if messages.length === 0}
+      {:else}
         <div class="no-messages">暂无消息</div>
-      {/if}
+      {/each}
     </div>
   </div>
 </div>
