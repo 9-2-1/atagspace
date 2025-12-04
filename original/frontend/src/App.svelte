@@ -5,8 +5,18 @@
   import MoveRuleManager from './components/MoveRuleManager.svelte';
   import { trpc } from './trpc/client';
 
+  interface State {
+    running: boolean;
+    progress: number;
+    totalFiles: number;
+    scannedFiles?: number;
+    movedFiles?: number;
+    currentFile: string;
+    startTime: number;
+    endTime: number | null;
+  }
   // 状态管理
-  let state = {
+  let state : {scanStatus: State, moveStatus: State} = {
     scanStatus: {
       running: false,
       progress: 0,

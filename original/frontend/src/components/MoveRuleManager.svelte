@@ -61,7 +61,7 @@
         id: rule.id,
         name: rule.name,
         conditions: rule.conditions,
-        targetPath: rule.targetPath,
+        targetPath: rule.target_path,
         enabled: rule.enabled,
       });
       await loadRules();
