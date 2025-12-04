@@ -1,13 +1,12 @@
 import { Router } from 'express';
 import { webprogress } from '../utils/webprogress';
-import type { Json } from '../types';
 
 const router = Router();
 export default router;
 
 // 获取进度
 router.get('/test', async (req, res) => {
-  await webprogress<Json, Json>({}, 16, res, async update => {
+  await webprogress({}, 16, res, async update => {
     try {
       for (let i = 0; i < 10; i++) {
         await new Promise(resolve => setTimeout(resolve, 200));

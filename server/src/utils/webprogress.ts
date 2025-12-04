@@ -1,4 +1,3 @@
-import type { Json } from '../types';
 import type { Response } from 'express';
 
 class HangUpError extends Error {
@@ -7,7 +6,7 @@ class HangUpError extends Error {
   }
 }
 
-export async function webprogress<State extends Json, Result extends Json>(
+export async function webprogress<State, Result>(
   initState: State,
   threshold: number = 16,
   res: Response,
