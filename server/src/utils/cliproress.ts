@@ -1,4 +1,4 @@
-export async function cliprogress<State, Result>(
+export default async function cliprogress<State, Result>(
   initState: State,
   threshold: number = 16,
   fn: (update: (state: State) => void) => Promise<Result>,

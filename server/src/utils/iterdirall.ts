@@ -1,5 +1,5 @@
 import fsP from 'fs/promises';
-import { cliprogress } from './cliproress.js';
+import cliprogress from './cliproress.js';
 
 export default async function iterdirall(callback: (loc: string) => void, path: string) {
   try {
@@ -49,5 +49,3 @@ export async function example() {
     state => `List ${state.list}, Stat ${state.stat}`
   );
 }
-
-example();
