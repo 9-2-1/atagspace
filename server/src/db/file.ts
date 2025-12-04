@@ -27,30 +27,30 @@ export interface File {
   isDir: number;
 }
 
-export function list(parentId: number) {
-  return db.prepare<[number], File>('SELECT * FROM file WHERE parentId = ?').all(parentId);
+export function list(parentId: number | null) {
+  return db.prepare<[number | null], File>('SELECT * FROM file WHERE parentId IS ?').all(parentId);
 }
 
-export function list_recursive(parentId: number) {
+export function list_recursive(parentId: number | null) {
   return db
-    .prepare<[number], File>(
+    .prepare<[number | null], File>(
       `\
 WITH RECURSIVE file_recursive AS (
  SELECT * FROM file
- WHERE parentId = ?
+ WHERE parentId IS ?
  UNION ALL
  SELECT * FROM file
- JOIN file_recursive ON file.parentId = file_recursive.id
+ JOIN file_recursive ON file.parentId IS file_recursive.id
 )
 SELECT * FROM file_recursive`
     )
     .all(parentId);
 }
 
-export function create(parentId: number, name: string, isDir: number) {
+export function create(parentId: number | null, name: string, isDir: number) {
   return db
     .prepare<
-      [number, string, number],
+      [number | null, string, number],
       number
     >('INSERT INTO file (parentId, name, isDir) VALUES (?, ?, ?) RETURNING id')
     .run(parentId, name, isDir);
@@ -64,13 +64,13 @@ export function rename(id: number, name: string) {
   db.prepare<[string, number], void>('UPDATE file SET name = ? WHERE id = ?').run(name, id);
 }
 
-export function move(id: number, parentId: number) {
-  db.prepare<[number, number], void>('UPDATE file SET parentId = ? WHERE id = ?').run(parentId, id);
+export function move(id: number, parentId: number | null) {
+  db.prepare<[number | null, number], void>('UPDATE file SET parentId IS ? WHERE id = ?').run(parentId, id);
 }
 
-export function move_rename(id: number, parentId: number, name: string) {
-  db.prepare<[number, string, number], void>(
-    'UPDATE file SET parentId = ?, name = ? WHERE id = ?'
+export function move_rename(id: number, parentId: number | null, name: string) {
+  db.prepare<[number | null, string, number], void>(
+    'UPDATE file SET parentId IS ?, name = ? WHERE id = ?'
   ).run(parentId, name, id);
 }
 
@@ -94,10 +94,10 @@ export function delete_recursive(id: number) {
     `\
 WITH RECURSIVE file_recursive AS (
  SELECT id FROM file
- WHERE parentId = ?
+ WHERE parentId IS ?
  UNION ALL
  SELECT id FROM file
- JOIN file_recursive ON file.parentId = file_recursive.id
+ JOIN file_recursive ON file.parentId IS file_recursive.id
 )
 DELETE FROM file_recursive WHERE id IN (SELECT id FROM file_recursive)`
   ).run(id);
