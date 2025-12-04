@@ -1,6 +1,6 @@
 import * as checksum from '../db/checksum';
-import * as z from 'zod';
-import { fn, tree } from '../utils/apitype';
+import { z } from 'zod';
+import { router, publicProcedure } from '../trpc';
 
 const FileQueryZ = z.object({
   path: z.string(),
@@ -19,10 +19,8 @@ const FileCheckSumZ = z.object({
   checksum: z.string(),
 });
 
-const apidef = tree({
-  set: fn(FileCheckSumZ, checksum.set),
-  touch_time: fn(z.number(), checksum.touch_time),
-  get: fn(FileQueryZ, checksum.get),
+export default router({
+  set: publicProcedure.input(FileCheckSumZ).mutation(opts => checksum.set(opts.input)),
+  touch_time: publicProcedure.input(z.number()).mutation(opts => checksum.touch_time(opts.input)),
+  get: publicProcedure.input(FileQueryZ).query(opts => checksum.get(opts.input)),
 });
-
-export default apidef;

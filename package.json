@@ -45,10 +45,14 @@
     "vite": "^7.2.6"
   },
   "dependencies": {
+    "@trpc/client": "^11.7.2",
+    "@trpc/server": "^11.7.2",
     "better-sqlite3": "^12.5.0",
     "cors": "^2.8.5",
     "express": "^5.2.1",
     "morgan": "^1.10.1",
+    "tsrpc": "^3.4.21",
+    "tsrpc-cli": "^2.4.5",
     "zod": "^4.1.13"
   }
 }

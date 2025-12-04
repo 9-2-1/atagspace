@@ -1,12 +1,11 @@
 import * as file_tag from '../db/file_tag';
-import * as z from 'zod';
-import { fn, tree } from '../utils/apitype';
+import { z } from 'zod';
+import { router, publicProcedure } from '../trpc';
 
 const fileTagZ = z.object({ fileId: z.number(), tagId: z.number() });
-const apidef = tree({
-  add: fn(fileTagZ, file_tag.add),
-  delete: fn(fileTagZ, file_tag.delete),
-  clear: fn(z.number(), file_tag.clear),
-});
 
-export default apidef;
+export default router({
+  add: publicProcedure.input(fileTagZ).mutation(opts => file_tag.add(opts.input)),
+  delete: publicProcedure.input(fileTagZ).mutation(opts => file_tag.delete(opts.input)),
+  clear: publicProcedure.input(z.number()).mutation(opts => file_tag.clear(opts.input)),
+});

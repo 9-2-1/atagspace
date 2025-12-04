@@ -1,6 +1,6 @@
 import * as file_deleted from '../db/file_deleted';
-import * as z from 'zod';
-import { fn, tree } from '../utils/apitype';
+import { z } from 'zod';
+import { router, publicProcedure } from '../trpc';
 
 const DeletedFileChecksumCreateZ = z.object({
   size: z.number(),
@@ -8,10 +8,10 @@ const DeletedFileChecksumCreateZ = z.object({
   deleteTime: z.number(),
 });
 
-const apidef = tree({
-  add: fn(DeletedFileChecksumCreateZ, file_deleted.add),
-  find: fn(z.string(), file_deleted.find),
-  delete: fn(z.number(), file_deleted.delete),
+export default router({
+  add: publicProcedure
+    .input(DeletedFileChecksumCreateZ)
+    .mutation(opts => file_deleted.add(opts.input)),
+  find: publicProcedure.input(z.string()).query(opts => file_deleted.find(opts.input)),
+  delete: publicProcedure.input(z.number()).mutation(opts => file_deleted.delete(opts.input)),
 });
-
-export default apidef;

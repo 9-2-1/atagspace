@@ -1,6 +1,6 @@
 import * as tag from '../db/tag';
-import * as z from 'zod';
-import { fn, tree } from '../utils/apitype';
+import { z } from 'zod';
+import { router, publicProcedure } from '../trpc';
 
 const TagColorZ = z.object({
   tagId: z.number(),
@@ -8,11 +8,9 @@ const TagColorZ = z.object({
   backcolor: z.string().nullable().optional(),
 });
 
-const apidef = tree({
-  get: fn(z.number(), tag.get),
-  named: fn(z.string(), tag.named),
-  remove: fn(z.number(), tag.remove),
-  color: fn(TagColorZ, tag.color),
+export default router({
+  get: publicProcedure.input(z.number()).query(opts => tag.get(opts.input)),
+  named: publicProcedure.input(z.string()).query(opts => tag.named(opts.input)),
+  remove: publicProcedure.input(z.number()).mutation(opts => tag.remove(opts.input)),
+  color: publicProcedure.input(TagColorZ).mutation(opts => tag.color(opts.input)),
 });
-
-export default apidef;

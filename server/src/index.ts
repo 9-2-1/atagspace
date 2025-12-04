@@ -3,10 +3,8 @@ import cors from 'cors';
 import path from 'path';
 import morgan from 'morgan';
 import { init } from './db';
-import { register } from './utils/apitype';
-import type { InferAPI } from './utils/apitype';
-
-import apidefs from './api';
+import { createExpressMiddleware } from '@trpc/server/adapters/express';
+import appRouter from './api';
 
 const app = express();
 const port = 4590;
@@ -18,11 +16,8 @@ app.use(cors());
 // 初始化数据库
 init();
 
-// 注册API路由
-const router = express.Router();
-register(router, apidefs);
-app.use('/api', router);
-export type API = InferAPI<typeof apidefs>;
+// 注册TRPC API路由
+app.use('/api', createExpressMiddleware({ router: appRouter, createContext: () => ({}) }));
 
 // Serve static files from the frontend dist directory
 app.use(express.static(path.join(__dirname, '../../dist')));
@@ -35,3 +30,5 @@ app.get(/^(?!\/api\/).*/, (req, res) => {
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
+
+export type AppRouter = typeof appRouter;

@@ -1,6 +1,6 @@
 import * as category from '../db/category';
-import * as z from 'zod';
-import { fn, tree } from '../utils/apitype';
+import { z } from 'zod';
+import { router, publicProcedure } from '../trpc';
 
 const CategoryColorZ = z.object({
   categoryId: z.number(),
@@ -8,11 +8,9 @@ const CategoryColorZ = z.object({
   backcolor: z.string().nullable().optional(),
 });
 
-const apidef = tree({
-  get: fn(z.number(), category.get),
-  named: fn(z.string(), category.named),
-  remove: fn(z.number(), category.remove),
-  color: fn(CategoryColorZ, category.color),
+export default router({
+  get: publicProcedure.input(z.number()).query(opts => category.get(opts.input)),
+  named: publicProcedure.input(z.string()).query(opts => category.named(opts.input)),
+  remove: publicProcedure.input(z.number()).mutation(opts => category.remove(opts.input)),
+  color: publicProcedure.input(CategoryColorZ).mutation(opts => category.color(opts.input)),
 });
-
-export default apidef;
