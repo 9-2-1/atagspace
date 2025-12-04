@@ -4,8 +4,14 @@ import path from 'path';
 import morgan from 'morgan';
 import { init } from './db';
 
+import categoryRouter from './api/category';
+import checksumRouter from './api/checksum';
+import fileDeletedRouter from './api/file_deleted';
+import fileTagRouter from './api/file_tag';
 import fileRouter from './api/file';
 import progressRouter from './api/progress';
+import sourceRouter from './api/source';
+import tagRouter from './api/tag';
 
 const app = express();
 const port = 4590;
@@ -17,11 +23,14 @@ app.use(cors());
 // 初始化数据库
 init();
 
-// 使用文件路由
+app.use('/api/category', categoryRouter);
+app.use('/api/checksum', checksumRouter);
+app.use('/api/file/deleted', fileDeletedRouter);
+app.use('/api/file/tag', fileTagRouter);
 app.use('/api/file', fileRouter);
-
-// 使用进度路由
 app.use('/api/progress', progressRouter);
+app.use('/api/source', sourceRouter);
+app.use('/api/tag', tagRouter);
 
 // Serve static files from the frontend dist directory
 app.use(express.static(path.join(__dirname, '../../dist')));

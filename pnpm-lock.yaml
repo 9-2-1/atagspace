@@ -19,6 +19,9 @@ importers:
       morgan:
         specifier: ^1.10.1
         version: 1.10.1
+      zod:
+        specifier: ^4.1.13
+        version: 4.1.13
     devDependencies:
       '@eslint/compat':
         specifier: ^2.0.0
@@ -3428,6 +3431,12 @@ packages:
       }
     engines: { node: '>= 10' }
 
+  zod@4.1.13:
+    resolution:
+      {
+        integrity: sha512-AvvthqfqrAhNH9dnfmrfKzX5upOdjUVJYFqNSlkmGf64gRaTzlPwz99IHYnVs28qYAybvAlBV+H7pn0saFY4Ig==,
+      }
+
 snapshots:
   '@cspotcode/source-map-support@0.8.1':
     dependencies:
@@ -5359,3 +5368,5 @@ snapshots:
       archiver-utils: 3.0.4
       compress-commons: 4.1.2
       readable-stream: 3.6.2
+
+  zod@4.1.13: {}

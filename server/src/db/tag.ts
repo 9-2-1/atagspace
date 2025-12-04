@@ -43,11 +43,15 @@ export function named(name: string) {
   return db.prepare<[string], Tag>(`SELECT * FROM tag WHERE name = ?`).get(name);
 }
 
-export function color(
-  tagId: number,
-  forecolor: string | null = null,
-  backcolor: string | null = null
-) {
+export function color({
+  tagId,
+  forecolor = null,
+  backcolor = null,
+}: {
+  tagId: number;
+  forecolor?: string | null;
+  backcolor?: string | null;
+}) {
   db.prepare<[number, string | null, string | null], void>(
     `UPDATE tag SET forecolor = ?2, backcolor = ?3 WHERE id = ?1`
   ).run(tagId, forecolor, backcolor);

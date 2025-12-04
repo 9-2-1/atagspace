@@ -31,12 +31,14 @@ export interface DeletedFileChecksum {
   deleteTime: number;
 }
 
+export type DeletedFileChecksumAdd = Omit<DeletedFileChecksum, 'id'>;
+
 export interface DeletedFileChecksumTag {
   entryId: number;
   tagId: number;
 }
 
-export function add({ size, checksum, deleteTime }: DeletedFileChecksum) {
+export function add({ size, checksum, deleteTime }: DeletedFileChecksumAdd) {
   return db
     .prepare<
       [number, string, number],

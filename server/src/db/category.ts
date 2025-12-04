@@ -27,11 +27,15 @@ export function named(name: string) {
   return db.prepare<[string], Category>(`SELECT * FROM category WHERE name = ?`).get(name);
 }
 
-export function color(
-  categoryId: number,
-  forecolor: string | null = null,
-  backcolor: string | null = null
-) {
+export function color({
+  categoryId,
+  forecolor = null,
+  backcolor = null,
+}: {
+  categoryId: number;
+  forecolor?: string | null;
+  backcolor?: string | null;
+}) {
   db.prepare<[number, string | null, string | null], void>(
     `UPDATE category SET forecolor = ?2, backcolor = ?3 WHERE id = ?1`
   ).run(categoryId, forecolor, backcolor);

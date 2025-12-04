@@ -47,7 +47,15 @@ SELECT * FROM file_recursive`
     .all(parentId);
 }
 
-export function create(parentId: number | null, name: string, isDir: number) {
+export function create({
+  parentId,
+  name,
+  isDir,
+}: {
+  parentId: number | null;
+  name: string;
+  isDir: number;
+}) {
   return db
     .prepare<
       [number | null, string, number],
@@ -65,10 +73,21 @@ export function rename(id: number, name: string) {
 }
 
 export function move(id: number, parentId: number | null) {
-  db.prepare<[number | null, number], void>('UPDATE file SET parentId IS ? WHERE id = ?').run(parentId, id);
+  db.prepare<[number | null, number], void>('UPDATE file SET parentId IS ? WHERE id = ?').run(
+    parentId,
+    id
+  );
 }
 
-export function move_rename(id: number, parentId: number | null, name: string) {
+export function move_rename({
+  id,
+  parentId,
+  name,
+}: {
+  id: number;
+  parentId: number | null;
+  name: string;
+}) {
   db.prepare<[number | null, string, number], void>(
     'UPDATE file SET parentId IS ?, name = ? WHERE id = ?'
   ).run(parentId, name, id);
