@@ -1,0 +1,21 @@
+{
+  "name": "atagspace",
+  "version": "1.0.0",
+  "description": "File tagging and management tool",
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm run dev:backend & pnpm run dev:frontend",
+    "dev:backend": "pnpm --filter backend dev",
+    "dev:frontend": "pnpm --filter frontend dev",
+    "build": "pnpm --filter backend build && pnpm --filter frontend build",
+    "lint": "pnpm run lint:backend && pnpm run lint:frontend",
+    "lint:backend": "pnpm --filter backend lint",
+    "lint:frontend": "pnpm --filter frontend lint",
+    "typecheck": "pnpm run typecheck:backend && pnpm run typecheck:frontend",
+    "typecheck:backend": "pnpm --filter backend typecheck",
+    "typecheck:frontend": "pnpm --filter frontend typecheck"
+  },
+  "keywords": ["file", "tagging", "management"],
+  "author": "",
+  "license": "MIT"
+}
