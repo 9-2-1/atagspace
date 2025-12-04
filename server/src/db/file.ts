@@ -7,10 +7,6 @@ export { file_tag as tag };
 
 export function init() {
   db.exec(`\
-CREATE TABLE IF NOT EXISTS file_source (
- name TEXT PRIMARY KEY NOT NULL,
- path TEXT NOT NULL
-) WITHOUT ROWID;
 CREATE TABLE IF NOT EXISTS file (
  id INTEGER PRIMARY KEY NOT NULL,
  parentId INTEGER, -- NULL: 根目录

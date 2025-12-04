@@ -1,9 +1,11 @@
+import * as source from './source';
 import * as file from './file';
 import * as checksum from './checksum';
 import * as tag from './tag';
 import * as category from './category';
 
 export function init() {
+  source.init();
   file.init();
   file.tag.init();
   file.deleted.init();
