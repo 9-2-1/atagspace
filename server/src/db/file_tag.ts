@@ -24,19 +24,21 @@ export interface TagFile {
   tagId: number;
 }
 
-export function add(fileId: number, tagId: number) {
+export function add({ fileId, tagId }: { fileId: number; tagId: number }) {
   db.prepare<[number, number], void>(`INSERT INTO file_tag (fileId, tagId) VALUES (?, ?)`).run(
     fileId,
     tagId
   );
 }
 
-export function remove(fileId: number, tagId: number) {
+function delete_({ fileId, tagId }: { fileId: number; tagId: number }) {
   db.prepare<[number, number], void>(`DELETE FROM file_tag WHERE fileId = ? AND tagId = ?`).run(
     fileId,
     tagId
   );
 }
+
+export { delete_ as delete };
 
 export function clear(fileId: number) {
   db.prepare<[number], void>(`DELETE FROM file_tag WHERE fileId = ?`).run(fileId);

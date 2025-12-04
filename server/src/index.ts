@@ -3,34 +3,26 @@ import cors from 'cors';
 import path from 'path';
 import morgan from 'morgan';
 import { init } from './db';
+import { register } from './utils/apitype';
+import type { InferAPI } from './utils/apitype';
 
-import categoryRouter from './api/category';
-import checksumRouter from './api/checksum';
-import fileDeletedRouter from './api/file_deleted';
-import fileTagRouter from './api/file_tag';
-import fileRouter from './api/file';
-import progressRouter from './api/progress';
-import sourceRouter from './api/source';
-import tagRouter from './api/tag';
+import apidefs from './api';
 
 const app = express();
 const port = 4590;
 
 app.use(morgan('combined'));
-app.use(express.text({ type: () => true }));
+app.use(express.json());
 app.use(cors());
 
 // 初始化数据库
 init();
 
-app.use('/api/category', categoryRouter);
-app.use('/api/checksum', checksumRouter);
-app.use('/api/file/deleted', fileDeletedRouter);
-app.use('/api/file/tag', fileTagRouter);
-app.use('/api/file', fileRouter);
-app.use('/api/progress', progressRouter);
-app.use('/api/source', sourceRouter);
-app.use('/api/tag', tagRouter);
+// 注册API路由
+const router = express.Router();
+register(router, apidefs);
+app.use('/api', router);
+export type API = InferAPI<typeof apidefs>;
 
 // Serve static files from the frontend dist directory
 app.use(express.static(path.join(__dirname, '../../dist')));

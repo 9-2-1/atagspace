@@ -1,12 +1,13 @@
 import * as source from '../db/source';
-import { Router } from 'express';
 import * as z from 'zod';
-import fastPostApi from '../utils/fastPostApi';
-
-const router = Router();
-export default router;
+import { fn, tree } from '../utils/apitype';
 
 const SourceZ = z.object({ name: z.string(), path: z.string() });
-fastPostApi(router, '/list', z.void(), source.list);
-fastPostApi(router, '/add', SourceZ, source.add);
-fastPostApi(router, '/delete', z.string(), source.delete);
+
+const apidef = tree({
+  list: fn(z.void(), source.list),
+  add: fn(SourceZ, source.add),
+  delete: fn(z.string(), source.delete),
+});
+
+export default apidef;

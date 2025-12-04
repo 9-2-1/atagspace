@@ -1,10 +1,6 @@
 import * as category from '../db/category';
-import { Router } from 'express';
 import * as z from 'zod';
-import fastPostApi from '../utils/fastPostApi';
-
-const router = Router();
-export default router;
+import { fn, tree } from '../utils/apitype';
 
 const CategoryColorZ = z.object({
   categoryId: z.number(),
@@ -12,7 +8,11 @@ const CategoryColorZ = z.object({
   backcolor: z.string().nullable().optional(),
 });
 
-fastPostApi(router, '/get', z.number(), category.get);
-fastPostApi(router, '/named', z.string(), category.named);
-fastPostApi(router, '/remove', z.number(), category.remove);
-fastPostApi(router, '/color', CategoryColorZ, category.color);
+const apidef = tree({
+  get: fn(z.number(), category.get),
+  named: fn(z.string(), category.named),
+  remove: fn(z.number(), category.remove),
+  color: fn(CategoryColorZ, category.color),
+});
+
+export default apidef;

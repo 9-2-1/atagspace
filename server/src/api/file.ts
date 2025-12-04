@@ -1,10 +1,6 @@
 import * as file from '../db/file';
-import { Router } from 'express';
 import * as z from 'zod';
-import fastPostApi from '../utils/fastPostApi';
-
-const router = Router();
-export default router;
+import { fn, tree } from '../utils/apitype';
 
 const FileCreateZ = z.object({
   parentId: z.number().nullable(),
@@ -18,10 +14,14 @@ const FileMoveRenameZ = z.object({
   name: z.string(),
 });
 
-fastPostApi(router, '/list', z.number().nullable(), file.list);
-fastPostApi(router, '/list_recursive', z.number().nullable(), file.list_recursive);
-fastPostApi(router, '/get', z.number(), file.get);
-fastPostApi(router, '/delete', z.number(), file.delete);
-fastPostApi(router, '/delete_recursive', z.number(), file.delete_recursive);
-fastPostApi(router, '/create', FileCreateZ, file.create);
-fastPostApi(router, '/move_rename', FileMoveRenameZ, file.move_rename);
+const apidef = tree({
+  list: fn(z.number().nullable(), file.list),
+  list_recursive: fn(z.number().nullable(), file.list_recursive),
+  get: fn(z.number(), file.get),
+  delete: fn(z.number(), file.delete),
+  delete_recursive: fn(z.number(), file.delete_recursive),
+  create: fn(FileCreateZ, file.create),
+  move_rename: fn(FileMoveRenameZ, file.move_rename),
+});
+
+export default apidef;

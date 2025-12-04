@@ -1,10 +1,6 @@
 import * as file_deleted from '../db/file_deleted';
-import { Router } from 'express';
 import * as z from 'zod';
-import fastPostApi from '../utils/fastPostApi';
-
-const router = Router();
-export default router;
+import { fn, tree } from '../utils/apitype';
 
 const DeletedFileChecksumCreateZ = z.object({
   size: z.number(),
@@ -12,6 +8,10 @@ const DeletedFileChecksumCreateZ = z.object({
   deleteTime: z.number(),
 });
 
-fastPostApi(router, '/add', DeletedFileChecksumCreateZ, file_deleted.add);
-fastPostApi(router, '/find', z.string(), file_deleted.find);
-fastPostApi(router, '/delete', z.number(), file_deleted.delete);
+const apidef = tree({
+  add: fn(DeletedFileChecksumCreateZ, file_deleted.add),
+  find: fn(z.string(), file_deleted.find),
+  delete: fn(z.number(), file_deleted.delete),
+});
+
+export default apidef;

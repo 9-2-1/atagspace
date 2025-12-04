@@ -1,10 +1,6 @@
 import * as checksum from '../db/checksum';
-import { Router } from 'express';
 import * as z from 'zod';
-import fastPostApi from '../utils/fastPostApi';
-
-const router = Router();
-export default router;
+import { fn, tree } from '../utils/apitype';
 
 const FileQueryZ = z.object({
   path: z.string(),
@@ -23,6 +19,10 @@ const FileCheckSumZ = z.object({
   checksum: z.string(),
 });
 
-fastPostApi(router, '/set', FileCheckSumZ, checksum.set);
-fastPostApi(router, '/touch_time', z.number(), checksum.touch_time);
-fastPostApi(router, '/get', FileQueryZ, checksum.get);
+const apidef = tree({
+  set: fn(FileCheckSumZ, checksum.set),
+  touch_time: fn(z.number(), checksum.touch_time),
+  get: fn(FileQueryZ, checksum.get),
+});
+
+export default apidef;

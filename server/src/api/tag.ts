@@ -1,10 +1,6 @@
 import * as tag from '../db/tag';
-import { Router } from 'express';
 import * as z from 'zod';
-import fastPostApi from '../utils/fastPostApi';
-
-const router = Router();
-export default router;
+import { fn, tree } from '../utils/apitype';
 
 const TagColorZ = z.object({
   tagId: z.number(),
@@ -12,7 +8,11 @@ const TagColorZ = z.object({
   backcolor: z.string().nullable().optional(),
 });
 
-fastPostApi(router, '/get', z.number(), tag.get);
-fastPostApi(router, '/named', z.string(), tag.named);
-fastPostApi(router, '/remove', z.number(), tag.remove);
-fastPostApi(router, '/color', TagColorZ, tag.color);
+const apidef = tree({
+  get: fn(z.number(), tag.get),
+  named: fn(z.string(), tag.named),
+  remove: fn(z.number(), tag.remove),
+  color: fn(TagColorZ, tag.color),
+});
+
+export default apidef;

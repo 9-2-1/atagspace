@@ -1,9 +1,12 @@
 import * as file_tag from '../db/file_tag';
-import { Router } from 'express';
 import * as z from 'zod';
-import fastPostApi from '../utils/fastPostApi';
+import { fn, tree } from '../utils/apitype';
 
-const router = Router();
-export default router;
+const fileTagZ = z.object({ fileId: z.number(), tagId: z.number() });
+const apidef = tree({
+  add: fn(fileTagZ, file_tag.add),
+  delete: fn(fileTagZ, file_tag.delete),
+  clear: fn(z.number(), file_tag.clear),
+});
 
-fastPostApi(router, '/clear', z.number(), file_tag.clear);
+export default apidef;
