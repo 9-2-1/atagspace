@@ -4,7 +4,7 @@ class ColorSet {
     public eleFG: HTMLInputElement,
     public eleBG: HTMLInputElement,
     public eleSet: HTMLElement,
-    public eleClear: HTMLElement,
+    public eleClear: HTMLElement
   ) {
     this.set(DEFAULT_COLOR);
     this.eleSet.onclick = () => {
@@ -21,7 +21,7 @@ class ColorSet {
     if (value == null) {
       return;
     }
-    let [fg, bg] = value.split("|");
+    let [fg, bg] = value.split('|');
     this.eleFG.value = fg;
     this.eleBG.value = bg;
   }

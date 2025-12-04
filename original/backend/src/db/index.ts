@@ -21,7 +21,7 @@ function initDb() {
 // 初始化数据库表
 export function initDatabase() {
   const database = initDb();
-  
+
   // Source表 - 源文件夹配置
   database.exec(`
     CREATE TABLE IF NOT EXISTS source (

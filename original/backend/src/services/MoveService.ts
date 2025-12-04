@@ -22,7 +22,7 @@ export class MoveService {
     movedFiles: 0,
     currentFile: '',
     startTime: 0,
-    endTime: null
+    endTime: null,
   };
 
   private constructor() {}
@@ -54,7 +54,7 @@ export class MoveService {
       movedFiles: 0,
       currentFile: '',
       startTime: Date.now(),
-      endTime: null
+      endTime: null,
     };
 
     // 异步执行移动
@@ -72,7 +72,7 @@ export class MoveService {
     try {
       // 获取所有启用的移动规则
       const rules = MoveRuleModel.list().filter(rule => rule.enabled);
-      
+
       // 获取所有文件
       const allFiles = FileModel.listRecurse('/');
       this.status.totalFiles = allFiles.length;
@@ -85,7 +85,7 @@ export class MoveService {
 
         const file = allFiles[i];
         this.status.currentFile = file.path + file.name;
-        this.status.progress = Math.round((i + 1) / allFiles.length * 100);
+        this.status.progress = Math.round(((i + 1) / allFiles.length) * 100);
 
         try {
           // 检查文件是否匹配任何规则
@@ -113,7 +113,9 @@ export class MoveService {
     // TODO: 实现规则匹配逻辑
     // 简化实现：检查文件标签是否包含规则中的所有标签
     const fileTags = file.tags.split(' ').filter((tag: string) => tag !== '');
-    const ruleTags = conditions.split(' ').filter((tag: string) => tag.startsWith('+'))
+    const ruleTags = conditions
+      .split(' ')
+      .filter((tag: string) => tag.startsWith('+'))
       .map((tag: string) => tag.substring(1));
 
     // 检查文件是否包含所有规则标签

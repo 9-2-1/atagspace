@@ -1,32 +1,32 @@
 const elename = [
-  "home",
-  "up",
-  "path",
-  "go",
-  "filter",
-  "find",
-  "filelist",
-  "category_create",
-  "category_delete",
-  "category_rename",
-  "category_color_fg",
-  "category_color_bg",
-  "category_color",
-  "category_clear",
-  "category",
-  "tag_add",
-  "tag_remove",
-  "tag_color_fg",
-  "tag_color_bg",
-  "tag_color",
-  "tag_clear",
-  "tags",
-  "tagsinput",
-  "tag_apply",
-  "preview",
+  'home',
+  'up',
+  'path',
+  'go',
+  'filter',
+  'find',
+  'filelist',
+  'category_create',
+  'category_delete',
+  'category_rename',
+  'category_color_fg',
+  'category_color_bg',
+  'category_color',
+  'category_clear',
+  'category',
+  'tag_add',
+  'tag_remove',
+  'tag_color_fg',
+  'tag_color_bg',
+  'tag_color',
+  'tag_clear',
+  'tags',
+  'tagsinput',
+  'tag_apply',
+  'preview',
 ] as const;
 
-const DEFAULT_COLOR = "#C0C0C0|#FFFFFF";
+const DEFAULT_COLOR = '#C0C0C0|#FFFFFF';
 
 function compare(a: string, b: string) {
   return a > b ? 1 : a < b ? -1 : 0;
@@ -51,7 +51,7 @@ class App {
     this.ele.category_color_fg as HTMLInputElement,
     this.ele.category_color_bg as HTMLInputElement,
     this.ele.category_color,
-    this.ele.category_clear,
+    this.ele.category_clear
   );
   tagCheckData = new CheckData<string>(true, true);
   tagCheckGroup = new CheckGroup<string>();
@@ -59,9 +59,9 @@ class App {
     this.ele.tag_color_fg as HTMLInputElement,
     this.ele.tag_color_bg as HTMLInputElement,
     this.ele.tag_color,
-    this.ele.tag_clear,
+    this.ele.tag_clear
   );
-  mode: "go" | "find" = "go";
+  mode: 'go' | 'find' = 'go';
 
   constructor() {
     this._setupNavigate();
@@ -78,26 +78,26 @@ class App {
 
   _setupNavigate() {
     this.ele.home.onclick = async () => {
-      await this.openFolder("/");
+      await this.openFolder('/');
     };
     this.ele.up.onclick = async () => {
       this.ele_path.value =
         this.ele_path.value
-          .split("/")
-          .filter((x) => x !== "")
+          .split('/')
+          .filter(x => x !== '')
           .slice(0, -1)
-          .map((x) => "/" + x)
-          .join("") + "/";
+          .map(x => '/' + x)
+          .join('') + '/';
       await this.openFolder(this.ele_path.value);
       this.fileCheckClear();
       await this.fileLoadAPI();
     };
     this.ele.go.onclick = () => {
-      this.mode = "go";
+      this.mode = 'go';
       this._reload();
     };
     this.ele.find.onclick = () => {
-      this.mode = "find";
+      this.mode = 'find';
       this._reload();
     };
   }
@@ -113,7 +113,7 @@ class App {
       }
       const fullPath = this._fullPath(file);
       if (file.is_dir) {
-        await this.openFolder(fullPath + "/");
+        await this.openFolder(fullPath + '/');
       } else {
         api.open_content(fullPath);
       }
@@ -124,13 +124,13 @@ class App {
         return;
       }
       const ele_preview = this.ele.preview as HTMLIFrameElement;
-      ele_preview.src = "about:blank";
+      ele_preview.src = 'about:blank';
       if (file.is_dir) {
         return;
       }
       const fullPath = this._fullPath(file);
       setTimeout(() => {
-        ele_preview.src = "/get_content?path=" + encodeURIComponent(fullPath);
+        ele_preview.src = '/get_content?path=' + encodeURIComponent(fullPath);
       }, 30);
     };
   }
@@ -139,12 +139,12 @@ class App {
     let checked = this.fileCheckData.select;
     this.tagCheckData.indeterminate.clear();
     this.tagCheckData.default_.clear();
-    this.ele_tagsinput.value = "";
+    this.ele_tagsinput.value = '';
     if (checked.size === 0) {
       // No file selected.
       this.fileCheckMode = 0;
-      this.ele_tagsinput.placeholder = "";
-      this.ele.tag_apply.innerText = "添加";
+      this.ele_tagsinput.placeholder = '';
+      this.ele.tag_apply.innerText = '添加';
     } else if (checked.size === 1) {
       // Single files selected.
       this.fileCheckMode = 1;
@@ -152,12 +152,12 @@ class App {
       if (file === undefined) {
         return;
       }
-      file.tags.forEach((tag) => {
+      file.tags.forEach(tag => {
         this.tagCheckData.default_.set(tag, 1);
       });
-      this.ele_tagsinput.value = file.tags.join(" ");
-      this.ele_tagsinput.placeholder = "tag1 tag2 tag3 ...";
-      this.ele.tag_apply.innerText = "修改";
+      this.ele_tagsinput.value = file.tags.join(' ');
+      this.ele_tagsinput.placeholder = 'tag1 tag2 tag3 ...';
+      this.ele.tag_apply.innerText = '修改';
     } else {
       // Multiple files selected.
       this._fileTagInitMulti(checked);
@@ -174,32 +174,32 @@ class App {
       if (file === undefined) {
         return;
       }
-      file.tags.forEach((tag) => {
+      file.tags.forEach(tag => {
         tagsOr.add(tag);
       });
       if (first) {
-        file.tags.forEach((tag) => {
+        file.tags.forEach(tag => {
           tagsAnd.add(tag);
         });
         first = false;
       } else {
-        tagsAnd.forEach((tag) => {
+        tagsAnd.forEach(tag => {
           if (!file.tags.includes(tag)) {
             tagsAnd.delete(tag);
           }
         });
       }
     });
-    tagsOr.forEach((tag) => {
+    tagsOr.forEach(tag => {
       this.tagCheckData.indeterminate.add(tag);
       this.tagCheckData.default_.set(tag, 2);
     });
-    tagsAnd.forEach((tag) => {
+    tagsAnd.forEach(tag => {
       this.tagCheckData.indeterminate.delete(tag);
       this.tagCheckData.default_.set(tag, 1);
     });
-    this.ele_tagsinput.placeholder = "+tag1 +tag2 -tag3 -tag4 ...";
-    this.ele.tag_apply.innerText = "修改";
+    this.ele_tagsinput.placeholder = '+tag1 +tag2 -tag3 -tag4 ...';
+    this.ele.tag_apply.innerText = '修改';
   }
   _setupTagSelect() {
     this.tagCheckData.oninvoke = async (elem: CheckElem<string>) => {
@@ -224,7 +224,7 @@ class App {
             tags.push(key);
           }
         });
-        this.ele_tagsinput.value = tags.join(" ");
+        this.ele_tagsinput.value = tags.join(' ');
       } else if (this.fileCheckMode === 1) {
         let tags: Array<string> = [];
         this.tagCheckData.select.forEach((value, key) => {
@@ -232,7 +232,7 @@ class App {
             tags.push(key);
           }
         });
-        this.ele_tagsinput.value = tags.join(" ");
+        this.ele_tagsinput.value = tags.join(' ');
       } else if (this.fileCheckMode === 2) {
         let tagchanges: Array<string> = [];
         this.tagCheckData.select.forEach((value, key) => {
@@ -241,24 +241,22 @@ class App {
           }
           let default_ = this.tagCheckData.default_.get(key) ?? 0;
           if (value !== default_) {
-            tagchanges.push((value === 1 ? "+" : "-") + key);
+            tagchanges.push((value === 1 ? '+' : '-') + key);
           }
         });
         this.tagCheckData.default_.forEach((value, key) => {
           if (!this.tagCheckData.select.has(key)) {
-            tagchanges.push("-" + key);
+            tagchanges.push('-' + key);
           }
         });
-        this.ele_tagsinput.value = tagchanges.join(" ");
+        this.ele_tagsinput.value = tagchanges.join(' ');
       }
     };
     this.ele.tag_apply.onclick = async () => {
       if (this.fileCheckMode === 0) {
         let cate = this.categoryCheckGroup.focusedElem();
         if (cate !== null) {
-          let tags = this.ele_tagsinput.value
-            .split(" ")
-            .filter((tag: string) => tag !== "");
+          let tags = this.ele_tagsinput.value.split(' ').filter((tag: string) => tag !== '');
           if (tags.length > 0) {
             await api.set_tags({ tags: tags, cate: cate.name });
             await this.categoryLoadAPI();
@@ -266,15 +264,11 @@ class App {
           }
         }
       } else if (this.fileCheckMode === 1) {
-        const file = this.fileindex.get(
-          this.fileCheckData.select.keys().next().value!,
-        );
+        const file = this.fileindex.get(this.fileCheckData.select.keys().next().value!);
         if (file === undefined) {
           return;
         }
-        file.tags = this.ele_tagsinput.value
-          .split(" ")
-          .filter((tag: string) => tag !== "");
+        file.tags = this.ele_tagsinput.value.split(' ').filter((tag: string) => tag !== '');
         await api.tag_file({ ids: [file.id], tags: file.tags });
         await this.fileLoadAPI();
         this._fileTagInit();
@@ -284,15 +278,15 @@ class App {
         let adds: Array<string> = [];
         let removes: Array<string> = [];
         let clearall = false;
-        tagchanges.split(" ").forEach((tagchange) => {
-          if (tagchange === "") {
+        tagchanges.split(' ').forEach(tagchange => {
+          if (tagchange === '') {
             return;
           }
-          if (tagchange[0] === "+") {
+          if (tagchange[0] === '+') {
             adds.push(tagchange.slice(1));
-          } else if (tagchange === "-") {
+          } else if (tagchange === '-') {
             clearall = true;
-          } else if (tagchange[0] === "-") {
+          } else if (tagchange[0] === '-') {
             removes.push(tagchange.slice(1));
           } else {
             adds.push(tagchange);
@@ -311,7 +305,7 @@ class App {
 
   _setupCategoryButtons() {
     this.ele.category_create.onclick = async () => {
-      let name = prompt("Category name");
+      let name = prompt('Category name');
       if (name === null) {
         return;
       }
@@ -324,7 +318,7 @@ class App {
         return;
       }
       let name = old_cate.name;
-      if (!confirm("Are you sure to delete category " + name + "?")) {
+      if (!confirm('Are you sure to delete category ' + name + '?')) {
         return;
       }
       await api.remove_category({ name });
@@ -336,24 +330,22 @@ class App {
         return;
       }
       let name = old_cate.name;
-      let newname = prompt("New category name", name);
+      let newname = prompt('New category name', name);
       if (newname === null) {
         return;
       }
       await api.rename_category({ name, newname });
       await this.categoryLoadAPI();
     };
-    this.categoryCheckGroup.onfocus = (elem) => {
+    this.categoryCheckGroup.onfocus = elem => {
       if (this.categoryCheckData.select.has(elem.name)) {
         // TODO move to top
         this.categoryCheckData.select.delete(elem.name);
         this.categoryCheckData.select.set(elem.name, 1);
       }
-      this.categoryColorSet.set(
-        this.cateindex.get(elem.name)?.color ?? DEFAULT_COLOR,
-      );
+      this.categoryColorSet.set(this.cateindex.get(elem.name)?.color ?? DEFAULT_COLOR);
     };
-    this.categoryColorSet.onSet = async (color) => {
+    this.categoryColorSet.onSet = async color => {
       let name = this.categoryCheckGroup.focusedElem()?.name;
       if (name === undefined) {
         return;
@@ -386,10 +378,10 @@ class App {
       await this.categoryLoadAPI();
       this.tagsLoad();
     };
-    this.tagCheckGroup.onfocus = (elem) => {
+    this.tagCheckGroup.onfocus = elem => {
       this.tagColorSet.set(this.colorindex.get(elem.name) ?? DEFAULT_COLOR);
     };
-    this.tagColorSet.onSet = async (color) => {
+    this.tagColorSet.onSet = async color => {
       let tags = [...this.tagCheckData.select.keys()];
       if (tags.length === 0) {
         return;
@@ -420,7 +412,7 @@ class App {
     return file.path + file.name;
   }
   async fileLoadAPI() {
-    let recurse = this.mode == "find";
+    let recurse = this.mode == 'find';
     let path = this.ele_path.value;
     let filter = this.ele_filter.value;
     let list = await api.list({ path, filter, recurse });
@@ -431,17 +423,14 @@ class App {
   }
   fileLoad(list: APIlist) {
     this.file = list;
-    this.ele.filelist.innerHTML = "";
+    this.ele.filelist.innerHTML = '';
     this.fileindex.clear();
     this.fileCheckGroup.clear();
-    list.forEach((file) => {
+    list.forEach(file => {
       const tags: Array<HTMLElement> = [];
       const fileTagGroup = new CheckGroup<string>();
-      file.tags.forEach((tag) => {
-        const tagCheck = new CheckElem(
-          tag,
-          Ele("div", ["tag", "check"], [tag]),
-        );
+      file.tags.forEach(tag => {
+        const tagCheck = new CheckElem(tag, Ele('div', ['tag', 'check'], [tag]));
         this.tagCheckData.add(tagCheck);
         this.applyColor(tagCheck.elem, this.getColor(tag));
         fileTagGroup.add(tagCheck);
@@ -450,21 +439,17 @@ class App {
       const fileCheck = new CheckElem(
         file.id,
         Ele(
-          "div",
-          ["file", "h-0", "check"],
+          'div',
+          ['file', 'h-0', 'check'],
           [
             Ele(
-              "div",
-              ["select"],
-              [
-                (this.mode == "find" ? file.path : "") +
-                  file.name +
-                  (file.is_dir ? "/" : ""),
-              ],
+              'div',
+              ['select'],
+              [(this.mode == 'find' ? file.path : '') + file.name + (file.is_dir ? '/' : '')]
             ),
-            Ele("div", [], tags),
-          ],
-        ),
+            Ele('div', [], tags),
+          ]
+        )
       );
       this.fileCheckData.add(fileCheck);
       this.fileCheckGroup.add(fileCheck);
@@ -482,25 +467,25 @@ class App {
     this.categoryCheckData.clear();
   }
   categoryLoad(category: APIcategory) {
-    this.ele.category.innerHTML = ""; // TODO safer clean
+    this.ele.category.innerHTML = ''; // TODO safer clean
     this.category = category;
     this.cateindex.clear();
     this.colorindex.clear();
     // preserve focus
     let focused = this.categoryCheckGroup.focusedElem()?.name;
     this.categoryCheckGroup.clear();
-    category.forEach((cate) => {
+    category.forEach(cate => {
       const name = cate.name;
       const categoryCheck = new CheckElem(
         name,
-        Ele("div", ["category", "check"], [name == "" ? "未分类" : name]),
+        Ele('div', ['category', 'check'], [name == '' ? '未分类' : name])
       );
       this.categoryCheckData.add(categoryCheck);
       this.categoryCheckGroup.add(categoryCheck);
       const catecolor = cate.color ?? category[0]?.color ?? DEFAULT_COLOR;
       this.applyColor(categoryCheck.elem, catecolor);
       this.ele.category.appendChild(categoryCheck.elem);
-      cate.tags.forEach((tag) => {
+      cate.tags.forEach(tag => {
         this.colorindex.set(tag.name, tag.color ?? catecolor);
       });
       this.cateindex.set(cate.name, cate);
@@ -514,18 +499,15 @@ class App {
   }
 
   tagsLoad() {
-    this.ele.tags.innerHTML = ""; // TODO safer clean
+    this.ele.tags.innerHTML = ''; // TODO safer clean
     this.tagCheckGroup.clear();
-    [...this.categoryCheckData.select.keys()].reverse().forEach((catename) => {
+    [...this.categoryCheckData.select.keys()].reverse().forEach(catename => {
       const cate = this.cateindex.get(catename);
       if (cate === undefined) {
         return;
       }
-      cate.tags.forEach((tag) => {
-        const tagCheck = new CheckElem(
-          tag.name,
-          Ele("div", ["tag", "check"], [tag.name]),
-        );
+      cate.tags.forEach(tag => {
+        const tagCheck = new CheckElem(tag.name, Ele('div', ['tag', 'check'], [tag.name]));
         this.ele.tags.appendChild(tagCheck.elem);
         const color = this.getColor(tag.name);
         this.applyColor(tagCheck.elem, color);
@@ -538,16 +520,16 @@ class App {
   tagColorReload() {
     this.tagCheckData.index.elemMap.forEach((tags, name) => {
       const color = this.getColor(name);
-      tags.forEach((tag) => {
+      tags.forEach(tag => {
         this.applyColor(tag.elem, color);
       });
     });
   }
 
   applyColor(ele: HTMLElement, color: string) {
-    let [fgcolor, bgcolor] = color.split("|");
-    ele.style.setProperty("--fgcolor", fgcolor);
-    ele.style.setProperty("--bgcolor", bgcolor);
+    let [fgcolor, bgcolor] = color.split('|');
+    ele.style.setProperty('--fgcolor', fgcolor);
+    ele.style.setProperty('--bgcolor', bgcolor);
   }
 
   getColor(name: string) {
@@ -561,24 +543,24 @@ class App {
     const mode = this.mode;
 
     if (path) {
-      params.set("path", path);
+      params.set('path', path);
     }
     if (filter) {
-      params.set("filter", filter);
+      params.set('filter', filter);
     }
     if (mode) {
-      params.set("mode", mode);
+      params.set('mode', mode);
     }
 
     const newURL = `${window.location.pathname}?${params.toString()}`;
-    window.history.replaceState({}, "", newURL);
+    window.history.replaceState({}, '', newURL);
   }
 
   _loadStateFromURL() {
     const params = new URLSearchParams(window.location.search);
-    const path = params.get("path");
-    const filter = params.get("filter");
-    const mode = params.get("mode");
+    const path = params.get('path');
+    const filter = params.get('filter');
+    const mode = params.get('mode');
 
     if (path !== null) {
       this.ele_path.value = path;
@@ -587,12 +569,12 @@ class App {
       this.ele_filter.value = filter;
     }
     if (mode !== null) {
-      this.mode = mode == "find" ? "find" : "go";
+      this.mode = mode == 'find' ? 'find' : 'go';
     }
     this._reload();
   }
 }
 
-window.addEventListener("load", () => {
+window.addEventListener('load', () => {
   new App();
 });

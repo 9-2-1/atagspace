@@ -8,7 +8,7 @@
     sources: [] as Source[],
     loading: true,
     error: '',
-    newSource: { name: '', path: '' }
+    newSource: { name: '', path: '' },
   };
 
   // 加载源文件夹
@@ -36,10 +36,7 @@
     }
 
     try {
-      await trpc.addSource.mutate({
-        name: state.newSource.name,
-        path: state.newSource.path
-      });
+      await trpc.addSource.mutate({ name: state.newSource.name, path: state.newSource.path });
       await loadSources();
       state.newSource = { name: '', path: '' };
     } catch (e) {
@@ -51,11 +48,7 @@
   // 更新源文件夹
   async function updateSource(source: Source) {
     try {
-      await trpc.updateSource.mutate({
-        id: source.id,
-        name: source.name,
-        path: source.path
-      });
+      await trpc.updateSource.mutate({ id: source.id, name: source.name, path: source.path });
       await loadSources();
     } catch (e) {
       state.error = 'Failed to update source';
@@ -77,7 +70,7 @@
 
 <div class="source-manager">
   <h2>Source Folders</h2>
-  
+
   {#if state.error}
     <div class="error">{state.error}</div>
   {/if}
@@ -86,16 +79,8 @@
   <div class="section">
     <h3>Add Source Folder</h3>
     <div class="input-group">
-      <input 
-        type="text" 
-        placeholder="Source name" 
-        bind:value={state.newSource.name}
-      />
-      <input 
-        type="text" 
-        placeholder="Source path" 
-        bind:value={state.newSource.path}
-      />
+      <input type="text" placeholder="Source name" bind:value={state.newSource.name} />
+      <input type="text" placeholder="Source path" bind:value={state.newSource.path} />
       <button on:click={addSource}>Add</button>
     </div>
   </div>
@@ -111,18 +96,10 @@
           <div class="source">
             <div class="source-info">
               <div class="source-name">
-                <input 
-                  type="text" 
-                  bind:value={source.name}
-                  placeholder="Source name"
-                />
+                <input type="text" bind:value={source.name} placeholder="Source name" />
               </div>
               <div class="source-path">
-                <input 
-                  type="text" 
-                  bind:value={source.path}
-                  placeholder="Source path"
-                />
+                <input type="text" bind:value={source.path} placeholder="Source path" />
               </div>
             </div>
             <div class="source-actions">
@@ -143,35 +120,35 @@
     border-radius: 8px;
     margin-bottom: 20px;
   }
-  
+
   h2 {
     margin-top: 0;
     color: #333;
   }
-  
+
   h3 {
     color: #555;
     margin-top: 20px;
     margin-bottom: 10px;
   }
-  
+
   .section {
     margin-bottom: 20px;
   }
-  
+
   .input-group {
     display: flex;
     gap: 10px;
     margin-bottom: 15px;
   }
-  
-  input[type="text"] {
+
+  input[type='text'] {
     padding: 8px;
     border: 1px solid #ddd;
     border-radius: 4px;
     flex: 1;
   }
-  
+
   button {
     padding: 8px 16px;
     color: white;
@@ -179,24 +156,24 @@
     border-radius: 4px;
     cursor: pointer;
   }
-  
+
   .save-btn {
-    background: #2196F3;
+    background: #2196f3;
   }
-  
+
   .save-btn:hover {
     background: #0b7dda;
   }
-  
+
   .delete-btn {
     background: #f44336;
     margin-left: 5px;
   }
-  
+
   .delete-btn:hover {
     background: #da190b;
   }
-  
+
   .error {
     color: red;
     margin-bottom: 15px;
@@ -204,41 +181,43 @@
     background: #ffebee;
     border-radius: 4px;
   }
-  
+
   .sources {
     margin-top: 15px;
   }
-  
+
   .source {
     margin-bottom: 15px;
     padding: 15px;
     background: white;
     border-radius: 6px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     gap: 10px;
   }
-  
+
   .source-info {
     flex: 1;
     display: flex;
     flex-direction: column;
     gap: 10px;
   }
-  
-  .source-name, .source-path {
+
+  .source-name,
+  .source-path {
     display: flex;
     flex-direction: column;
   }
-  
-  .source-name label, .source-path label {
+
+  .source-name label,
+  .source-path label {
     font-size: 12px;
     color: #666;
     margin-bottom: 5px;
   }
-  
+
   .source-actions {
     display: flex;
     flex-direction: column;

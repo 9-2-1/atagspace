@@ -9,7 +9,7 @@
     loading: true,
     error: '',
     newCategory: { name: '', color: '#ffffff' },
-    newTag: { name: '', category: '' }
+    newTag: { name: '', category: '' },
   };
 
   // 加载分类和标签
@@ -39,7 +39,7 @@
     try {
       await trpc.addCategory.mutate({
         name: state.newCategory.name,
-        color: state.newCategory.color
+        color: state.newCategory.color,
       });
       await loadCategories();
       state.newCategory = { name: '', color: '#ffffff' };
@@ -56,10 +56,7 @@
     }
 
     try {
-      await trpc.addTag.mutate({
-        name: state.newTag.name,
-        category: state.newTag.category
-      });
+      await trpc.addTag.mutate({ name: state.newTag.name, category: state.newTag.category });
       await loadCategories();
       state.newTag.name = '';
     } catch (e) {
@@ -93,7 +90,7 @@
 
 <div class="tag-manager">
   <h2>Tag Manager</h2>
-  
+
   {#if state.error}
     <div class="error">{state.error}</div>
   {/if}
@@ -102,15 +99,8 @@
   <div class="section">
     <h3>Add Category</h3>
     <div class="input-group">
-      <input 
-        type="text" 
-        placeholder="Category name" 
-        bind:value={state.newCategory.name}
-      />
-      <input 
-        type="color" 
-        bind:value={state.newCategory.color}
-      />
+      <input type="text" placeholder="Category name" bind:value={state.newCategory.name} />
+      <input type="color" bind:value={state.newCategory.color} />
       <button on:click={addCategory}>Add</button>
     </div>
   </div>
@@ -119,11 +109,7 @@
   <div class="section">
     <h3>Add Tag</h3>
     <div class="input-group">
-      <input 
-        type="text" 
-        placeholder="Tag name" 
-        bind:value={state.newTag.name}
-      />
+      <input type="text" placeholder="Tag name" bind:value={state.newTag.name} />
       <select bind:value={state.newTag.category}>
         <option value="">Select category</option>
         {#each state.categories as category}
@@ -148,7 +134,9 @@
                 <strong>{category.name}</strong>
                 <span class="tag-count">({category.tags.length} tags)</span>
               </div>
-              <button class="delete-btn" on:click={() => deleteCategory(category.name)}>Delete</button>
+              <button class="delete-btn" on:click={() => deleteCategory(category.name)}
+                >Delete</button
+              >
             </div>
             <div class="tags">
               {#each category.tags as tag}
@@ -172,66 +160,67 @@
     border-radius: 8px;
     margin-bottom: 20px;
   }
-  
+
   h2 {
     margin-top: 0;
     color: #333;
   }
-  
+
   h3 {
     color: #555;
     margin-top: 20px;
     margin-bottom: 10px;
   }
-  
+
   .section {
     margin-bottom: 20px;
   }
-  
+
   .input-group {
     display: flex;
     gap: 10px;
     margin-bottom: 15px;
   }
-  
-  input[type="text"], select {
+
+  input[type='text'],
+  select {
     padding: 8px;
     border: 1px solid #ddd;
     border-radius: 4px;
     flex: 1;
   }
-  
-  input[type="color"] {
+
+  input[type='color'] {
     width: 50px;
     height: 36px;
     border: 1px solid #ddd;
     border-radius: 4px;
     cursor: pointer;
   }
-  
+
   button {
     padding: 8px 16px;
-    background: #4CAF50;
+    background: #4caf50;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
   }
-  
+
   button:hover {
     background: #45a049;
   }
-  
+
   .delete-btn {
     background: #f44336;
     padding: 4px 8px;
     font-size: 14px;
   }
-  
+
   .delete-btn:hover {
     background: #da190b;
   }
-  
+
   .error {
     color: red;
     margin-bottom: 15px;
@@ -239,47 +228,47 @@
     background: #ffebee;
     border-radius: 4px;
   }
-  
+
   .categories {
     margin-top: 15px;
   }
-  
+
   .category {
     margin-bottom: 20px;
     padding: 15px;
     background: white;
     border-radius: 6px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
-  
+
   .category-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 10px;
   }
-  
+
   .category-info {
     display: flex;
     align-items: center;
     gap: 10px;
     padding: 8px 12px;
     border-radius: 4px;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
-  
+
   .tag-count {
     font-size: 12px;
     color: #666;
   }
-  
+
   .tags {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
     margin-top: 10px;
   }
-  
+
   .tag-item {
     display: flex;
     align-items: center;
@@ -289,7 +278,7 @@
     border-radius: 16px;
     font-size: 14px;
   }
-  
+
   .tag-name {
     color: #1976d2;
   }

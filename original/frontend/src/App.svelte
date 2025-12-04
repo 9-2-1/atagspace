@@ -14,7 +14,7 @@
       scannedFiles: 0,
       currentFile: '',
       startTime: 0,
-      endTime: null
+      endTime: null,
     },
     moveStatus: {
       running: false,
@@ -23,8 +23,8 @@
       movedFiles: 0,
       currentFile: '',
       startTime: 0,
-      endTime: null
-    }
+      endTime: null,
+    },
   };
 
   // 定期更新状态
@@ -93,34 +93,23 @@
 
 <div>
   <h1>atagspace - File Tagging and Management Tool</h1>
-  
+
   <!-- 扫描和移动控制 -->
   <div class="controls">
     <div class="control-section">
       <h2>Scan Control</h2>
       <div class="control-buttons">
-        <button 
-          class="primary-btn" 
-          on:click={startScan}
-          disabled={state.scanStatus.running}
-        >
+        <button class="primary-btn" on:click={startScan} disabled={state.scanStatus.running}>
           Start Scan
         </button>
-        <button 
-          class="secondary-btn" 
-          on:click={stopScan}
-          disabled={!state.scanStatus.running}
-        >
+        <button class="secondary-btn" on:click={stopScan} disabled={!state.scanStatus.running}>
           Stop Scan
         </button>
       </div>
       {#if state.scanStatus.running || state.scanStatus.endTime}
         <div class="progress-section">
           <div class="progress-bar-container">
-            <div 
-              class="progress-bar" 
-              style="width: ${state.scanStatus.progress}%"
-            ></div>
+            <div class="progress-bar" style="width: ${state.scanStatus.progress}%"></div>
           </div>
           <div class="progress-info">
             <span>{state.scanStatus.scannedFiles} / {state.scanStatus.totalFiles} files</span>
@@ -136,28 +125,17 @@
     <div class="control-section">
       <h2>Move Control</h2>
       <div class="control-buttons">
-        <button 
-          class="primary-btn" 
-          on:click={startMove}
-          disabled={state.moveStatus.running}
-        >
+        <button class="primary-btn" on:click={startMove} disabled={state.moveStatus.running}>
           Start Move
         </button>
-        <button 
-          class="secondary-btn" 
-          on:click={stopMove}
-          disabled={!state.moveStatus.running}
-        >
+        <button class="secondary-btn" on:click={stopMove} disabled={!state.moveStatus.running}>
           Stop Move
         </button>
       </div>
       {#if state.moveStatus.running || state.moveStatus.endTime}
         <div class="progress-section">
           <div class="progress-bar-container">
-            <div 
-              class="progress-bar" 
-              style="width: ${state.moveStatus.progress}%"
-            ></div>
+            <div class="progress-bar" style="width: ${state.moveStatus.progress}%"></div>
           </div>
           <div class="progress-info">
             <span>{state.moveStatus.movedFiles} / {state.moveStatus.totalFiles} files</span>
@@ -187,7 +165,7 @@
     padding: 20px;
     background-color: #f0f0f0;
   }
-  
+
   h1 {
     color: #333;
     font-size: 2rem;
@@ -206,7 +184,7 @@
     background: white;
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
 
   .control-section h2 {
@@ -232,7 +210,7 @@
   }
 
   .primary-btn {
-    background: #4CAF50;
+    background: #4caf50;
     color: white;
   }
 
@@ -269,7 +247,7 @@
 
   .progress-bar {
     height: 100%;
-    background: #4CAF50;
+    background: #4caf50;
     transition: width 0.3s ease;
   }
 

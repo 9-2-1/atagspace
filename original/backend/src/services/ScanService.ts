@@ -24,7 +24,7 @@ export class ScanService {
     scannedFiles: 0,
     currentFile: '',
     startTime: 0,
-    endTime: null
+    endTime: null,
   };
 
   private constructor() {}
@@ -56,7 +56,7 @@ export class ScanService {
       scannedFiles: 0,
       currentFile: '',
       startTime: Date.now(),
-      endTime: null
+      endTime: null,
     };
 
     // 异步执行扫描
@@ -74,7 +74,7 @@ export class ScanService {
     try {
       // 获取所有源文件夹
       const sources = SourceModel.list();
-      
+
       // 收集所有文件
       const allFiles: Array<{
         sourceName: string;
@@ -102,17 +102,14 @@ export class ScanService {
         const fileInfo = allFiles[i];
         this.status.currentFile = fileInfo.fullPath;
         this.status.scannedFiles = i + 1;
-        this.status.progress = Math.round((i + 1) / allFiles.length * 100);
+        this.status.progress = Math.round(((i + 1) / allFiles.length) * 100);
 
         try {
           const stat = statSync(fileInfo.fullPath);
           const isDir = stat.isDirectory();
-          
+
           // 检查文件是否已存在于数据库中
-          const existingFile = FileModel.getPathName(
-            fileInfo.relativePath,
-            fileInfo.sourceName
-          );
+          const existingFile = FileModel.getPathName(fileInfo.relativePath, fileInfo.sourceName);
 
           if (existingFile) {
             // 更新现有文件
@@ -167,14 +164,9 @@ export class ScanService {
           if (entry.name.startsWith('.')) {
             continue;
           }
-          
-          allFiles.push({
-            sourceName,
-            sourcePath,
-            fullPath,
-            relativePath
-          });
-          
+
+          allFiles.push({ sourceName, sourcePath, fullPath, relativePath });
+
           // 递归扫描子目录
           this.collectFiles(sourceName, fullPath, allFiles);
         } else {
@@ -182,13 +174,8 @@ export class ScanService {
           if (entry.name.startsWith('.')) {
             continue;
           }
-          
-          allFiles.push({
-            sourceName,
-            sourcePath,
-            fullPath,
-            relativePath
-          });
+
+          allFiles.push({ sourceName, sourcePath, fullPath, relativePath });
         }
       }
     } catch (error) {

@@ -10,10 +10,7 @@ const PORT = 3000;
 initDatabase();
 
 // 配置tRPC中间件
-app.use('/api', createExpressMiddleware({
-  router: appRouter,
-  createContext: () => ({}),
-}));
+app.use('/api', createExpressMiddleware({ router: appRouter, createContext: () => ({}) }));
 
 // 静态文件服务（用于前端构建后的文件）
 app.use(express.static('../frontend/dist'));

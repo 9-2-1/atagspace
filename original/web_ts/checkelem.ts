@@ -4,7 +4,7 @@ class CheckElem<NAME> {
   groupindex: number | null = null;
   constructor(
     public name: NAME,
-    public elem: HTMLElement,
+    public elem: HTMLElement
   ) {
     elem.onclick = (e: MouseEvent) => {
       e.preventDefault();
@@ -66,19 +66,19 @@ class CheckElem<NAME> {
     }
   }
   setSelect(select: number) {
-    this.elem.classList.remove("checked");
-    this.elem.classList.remove("indeterminate");
+    this.elem.classList.remove('checked');
+    this.elem.classList.remove('indeterminate');
     if (select == 2) {
-      this.elem.classList.add("indeterminate");
+      this.elem.classList.add('indeterminate');
     } else if (select == 1) {
-      this.elem.classList.add("checked");
+      this.elem.classList.add('checked');
     }
   }
   setFocus(focused: boolean) {
     if (focused) {
-      this.elem.classList.add("focused");
+      this.elem.classList.add('focused');
     } else {
-      this.elem.classList.remove("focused");
+      this.elem.classList.remove('focused');
     }
   }
 }
@@ -114,7 +114,7 @@ class CheckData<NAME> {
   default_: Map<NAME, number> = new Map();
   constructor(
     public sticky: boolean = false,
-    public rightreset: boolean = false,
+    public rightreset: boolean = false
   ) {}
   onchange = () => {};
   oninvoke = (checkelem: CheckElem<NAME>) => {};
@@ -172,7 +172,7 @@ class CheckData<NAME> {
         toreset.add(k);
       }
     });
-    toreset.forEach((k) => {
+    toreset.forEach(k => {
       const v = this.default_.get(k) ?? 0;
       this.update(k, v, user);
     });
@@ -221,7 +221,7 @@ class CheckGroup<NAME> {
       this.elist[this.focused].setFocus(false);
     }
     this.focused = null;
-    this.elist.forEach((x) => {
+    this.elist.forEach(x => {
       x.group = null;
     });
     this.elist = [];

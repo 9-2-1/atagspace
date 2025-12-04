@@ -4,17 +4,17 @@ body {
 }
 
 @font-face {
-  font-family: "Fira Mono";
+  font-family: 'Fira Mono';
   font-display: swap;
   src:
-    url("FiraMono-Regular.woff2") format("woff2"),
-    url("FiraMono-Regular.woff") format("woff"),
-    url("FiraMono-Regular.ttf") format("truetype");
+    url('FiraMono-Regular.woff2') format('woff2'),
+    url('FiraMono-Regular.woff') format('woff'),
+    url('FiraMono-Regular.ttf') format('truetype');
 }
 
 * {
   box-sizing: border-box;
-  font-family: "Fira Mono", "Courier New", Courier, monospace;
+  font-family: 'Fira Mono', 'Courier New', Courier, monospace;
   font-size: 16px;
 }
 
@@ -90,7 +90,7 @@ textarea {
   overflow: auto;
 }
 
-input[type="color"] {
+input[type='color'] {
   padding: 0;
 }
 
