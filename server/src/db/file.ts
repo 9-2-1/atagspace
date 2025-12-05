@@ -1,123 +1,153 @@
-import { db } from './db';
+import { db } from './_db';
+const SQLNow = "unixepoch('now', 'subsecond')";
 
-import * as file_deleted from './file_deleted';
-export { file_deleted as deleted };
-import * as file_tag from './file_tag';
-export { file_tag as tag };
-
-export function init() {
-  db.exec(`\
-CREATE TABLE IF NOT EXISTS file (
- id INTEGER PRIMARY KEY NOT NULL,
- parentId INTEGER, -- NULL: 根目录
- name TEXT NOT NULL,
- description TEXT, -- 说明
- isDir INTEGER, -- 0: 文件, 1: 目录
- FOREIGN KEY (parentId) REFERENCES file(id)
+db.exec(
+  [
+    'CREATE TABLE IF NOT EXISTS file (',
+    ' id INTEGER NOT NULL PRIMARY KEY,',
+    ' parentId INTEGER,', // NULL = root
+    ' name TEXT NOT NULL,',
+    ' isDir INTEGER NOT NULL DEFAULT 0,', // 0 = file, 1 = dir
+    ' dev INTEGER,', // device
+    ' ino INTEGER,', // inode % (2**32)
+    ' size INTEGER,', // directory: total
+    ' mtime REAL,', // ms
+    ' description TEXT, ', // file description
+    ' ctime REAL NOT NULL,', // last updated time
+    ' FOREIGN KEY (parentId) REFERENCES file(id) ON DELETE CASCADE',
+    ');',
+    'CREATE UNIQUE INDEX IF NOT EXISTS file_parentId_name ON file (parentId, name);',
+    'CREATE INDEX IF NOT EXISTS file_dev_ino_ctime ON file (dev, ino, ctime);',
+    'CREATE INDEX IF NOT EXISTS file_name_size_mtime_ctime ON file (name, size, mtime, ctime);',
+  ].join('\n')
 );
-CREATE UNIQUE INDEX IF NOT EXISTS file_parent_name ON file(parentId, name);
-`);
-}
 
-export interface File {
-  id: number;
-  parentId: number | null;
+export type File = {
+  id: bigint;
+  parentId: bigint | null;
   name: string;
-  description: string | null;
-  isDir: number;
+  isDir: bigint; // 0 = file, 1 = dir
+  dev: bigint | null;
+  ino: bigint | null;
+  size: bigint | null;
+  mtime: number | null; // mtime
+  description: string | null; // file description
+  ctime: number; // Last update time (second timestamp)
+};
+
+export type FileCreate = Omit<File, 'id' | 'ctime'>;
+const createStatement = db
+  .prepare<FileCreate, bigint>(
+    [
+      'INSERT INTO file', // format expand
+      ' (parentId, name, isDir, dev, ino, size, mtime, description, ctime)',
+      ' VALUES',
+      ` (:parentId, :name, :isDir, :dev, :ino, :size, :mtime, :description, ${SQLNow})`,
+      ' RETURNING id',
+    ].join('\n')
+  )
+  .pluck();
+export function create(file: FileCreate): bigint {
+  return createStatement.get(file)!;
 }
 
-export function list(parentId: number | null) {
-  return db.prepare<[number | null], File>('SELECT * FROM file WHERE parentId IS ?').all(parentId);
+export type FileUpdate = Pick<File, 'id' | 'isDir' | 'dev' | 'ino' | 'size' | 'mtime'>;
+const updateStatement = db.prepare<FileUpdate, void>(
+  [
+    'UPDATE file SET', // format expand
+    ' dev = :dev,',
+    ' isDir = :isDir,',
+    ' ino = :ino,',
+    ' size = :size,',
+    ' mtime = :mtime,',
+    ` ctime = ${SQLNow}`,
+    ' WHERE id = :id',
+  ].join('\n')
+);
+export function update(file: FileUpdate): void {
+  updateStatement.run(file);
 }
 
-export function list_recursive(parentId: number | null) {
-  return db
-    .prepare<[number | null], File>(
-      `\
-WITH RECURSIVE file_recursive AS (
- SELECT * FROM file
- WHERE parentId IS ?
- UNION ALL
- SELECT * FROM file
- JOIN file_recursive ON file.parentId IS file_recursive.id
-)
-SELECT * FROM file_recursive`
-    )
-    .all(parentId);
+const getStatement = db.prepare<Pick<File, 'id'>, File>('SELECT * FROM file WHERE id = :id');
+export function get(id: bigint): File | null {
+  return getStatement.get({ id }) ?? null;
 }
 
-export function create({
-  parentId,
-  name,
-  isDir,
-}: {
-  parentId: number | null;
-  name: string;
-  isDir: number;
-}) {
-  return db
-    .prepare<
-      [number | null, string, number],
-      number
-    >('INSERT INTO file (parentId, name, isDir) VALUES (?, ?, ?) RETURNING id')
-    .run(parentId, name, isDir);
+const getByNameStatement = db.prepare<Pick<File, 'parentId' | 'name'>, File>(
+  'SELECT * FROM file WHERE parentId IS :parentId AND name = :name'
+);
+export function getByName(parentId: bigint | null, name: string): File | null {
+  return getByNameStatement.get({ parentId, name }) ?? null;
 }
 
-export function get(id: number) {
-  return db.prepare<[number], File>('SELECT * FROM file WHERE id = ?').get(id);
+const moveStatement = db.prepare<Pick<File, 'id' | 'parentId'>, void>(
+  'UPDATE file SET parentId = :parentId WHERE id = :id'
+);
+export function move(id: bigint, parentId: bigint): void {
+  moveStatement.run({ id, parentId });
 }
 
-export function rename(id: number, name: string) {
-  db.prepare<[string, number], void>('UPDATE file SET name = ? WHERE id = ?').run(name, id);
+const renameStatement = db.prepare<Pick<File, 'id' | 'name'>, void>(
+  'UPDATE file SET name = :name WHERE id = :id'
+);
+export function rename(id: bigint, name: string): void {
+  renameStatement.run({ id, name });
 }
 
-export function move(id: number, parentId: number | null) {
-  db.prepare<[number | null, number], void>('UPDATE file SET parentId IS ? WHERE id = ?').run(
-    parentId,
-    id
-  );
+const moveRenameStatement = db.prepare<Pick<File, 'id' | 'parentId' | 'name'>, void>(
+  'UPDATE file SET parentId = :parentId, name = :name WHERE id = :id'
+);
+export function moveRename(id: bigint, parentId: bigint, name: string): void {
+  moveRenameStatement.run({ id, parentId, name });
 }
 
-export function move_rename({
-  id,
-  parentId,
-  name,
-}: {
-  id: number;
-  parentId: number | null;
-  name: string;
-}) {
-  db.prepare<[number | null, string, number], void>(
-    'UPDATE file SET parentId IS ?, name = ? WHERE id = ?'
-  ).run(parentId, name, id);
+const deleteStatement = db.prepare<Pick<File, 'id'>, void>('DELETE FROM file WHERE id = :id');
+// be careful! this will delete all children
+function delete_(id: bigint): void {
+  deleteStatement.run({ id });
 }
-
-export function set_description(id: number, description: string | null) {
-  db.prepare<[string | null, number], void>('UPDATE file SET description = ? WHERE id = ?').run(
-    description,
-    id
-  );
-}
-
-// avoid keyword
-function delete_(id: number) {
-  db.prepare<[number], void>('DELETE FROM file WHERE id = ?').run(id);
-}
-
 export { delete_ as delete };
 
-// Won't use in real world as here are TAGS to process and delete
-export function delete_recursive(id: number) {
-  db.prepare<[number], void>(
-    `\
-WITH RECURSIVE file_recursive AS (
- SELECT id FROM file
- WHERE parentId IS ?
- UNION ALL
- SELECT id FROM file
- JOIN file_recursive ON file.parentId IS file_recursive.id
-)
-DELETE FROM file_recursive WHERE id IN (SELECT id FROM file_recursive)`
-  ).run(id);
+const listStatement = db.prepare<Pick<File, 'parentId'>, File>(
+  'SELECT * FROM file WHERE parentId IS :parentId'
+);
+export function list(parentId: bigint | null): File[] {
+  return listStatement.all({ parentId });
+}
+
+const describeStatement = db.prepare<Pick<File, 'id' | 'description'>, void>(
+  `UPDATE file SET description = :description, ctime = ${SQLNow} WHERE id = :id`
+);
+export function describe(id: bigint, description: string | null): void {
+  describeStatement.run({ id, description });
+}
+
+const touchCtimeStatement = db.prepare<Pick<File, 'id'>, void>(
+  `UPDATE file SET ctime = ${SQLNow} WHERE id = :id`
+);
+export function touchCtime(id: bigint): void {
+  touchCtimeStatement.run({ id });
+}
+
+const getMaxNameStatement = db
+  .prepare<Pick<File, 'parentId'>, string>('SELECT MAX(name) FROM file WHERE parentId IS :parentId')
+  .pluck();
+export function getMaxName(parentId: bigint): string | null {
+  return getMaxNameStatement.get({ parentId }) ?? null;
+}
+
+// 获取最近更改的，相同 dev, ino 的文件，用于恢复标签，说明等
+const matchDevInoStatement = db.prepare<Pick<File, 'dev' | 'ino'>, File>(
+  'SELECT * FROM file WHERE dev = :dev AND ino = :ino ORDER BY ctime DESC LIMIT 1'
+);
+export function matchDevIno(dev: bigint, ino: bigint): File | null {
+  return matchDevInoStatement.get({ dev, ino }) ?? null;
+}
+
+// 获取最近更改的，相同 name, size, mtime 的文件，用于恢复标签，说明等
+const matchNameSizeMtimeStatement = db.prepare<Pick<File, 'name' | 'size' | 'mtime'>, File>(
+  'SELECT * FROM file WHERE name = :name AND size = :size AND mtime = :mtime ORDER BY ctime DESC LIMIT 1'
+);
+export function matchNameSizeMtime(name: string, size: bigint, mtime: number): File | null {
+  return matchNameSizeMtimeStatement.get({ name, size, mtime }) ?? null;
 }
