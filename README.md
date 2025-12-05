@@ -1,47 +1,60 @@
-# Svelte + TS + Vite
+Demands:
 
-This template should help get you started developing with Svelte and TypeScript in Vite.
+1. 给文件打标签
+2. 包含特定文件夹下的所有文件
+3. 按照标签分类
 
-## Recommended IDE Setup
+Require:
 
-[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode).
+1. 标签->文件名 数据库
+2. 扫描文件函数
+3. 移动文件并更新数据库函数
 
-## Need an official Svelte framework?
+4. 分类规则
 
-Check out [SvelteKit](https://github.com/sveltejs/kit#readme), which is also powered by Vite. Deploy anywhere with its serverless-first approach and adapt to various platforms, with out of the box support for TypeScript, SCSS, and Less, and easily-added support for mdsvex, GraphQL, PostCSS, Tailwind CSS, and more.
+---
 
-## Technical considerations
+Demands:
 
-**Why use this over SvelteKit?**
+1. 检测文件/文件夹重命名（dev-ino + name/size/mtime，不需要哈希）
+2. 方便的重命名结构（不要批量修改文件名）
+3. 在数据库内建回收站文件夹。使用回收站而不是删除
+4. 回收站过期时间
 
-- It brings its own routing solution which might not be preferable for some users.
-- It is first and foremost a framework that just happens to use Vite under the hood, not a Vite app.
+Require:
 
-This template contains as little as possible to get started with Vite + TypeScript + Svelte, while taking into account the developer experience with regards to HMR and intellisense. It demonstrates capabilities on par with the other `create-vite` templates and is a good starting point for beginners dipping their toes into a Vite + Svelte project.
+1. 使用级联删除
+2. 增加过期时间/最后修改时间
+3. 保留文件夹结构
+4. 方便的添加/删除/同步结构
+5. 获得路径的函数
 
-Should you later need the extended capabilities and extensibility provided by SvelteKit, the template has been structured similarly to SvelteKit so that it is easy to migrate.
+---
 
-**Why `global.d.ts` instead of `compilerOptions.types` inside `jsconfig.json` or `tsconfig.json`?**
+Demands:
 
-Setting `compilerOptions.types` shuts out all other types not explicitly listed in the configuration. Using triple-slash references keeps the default TypeScript setting of accepting type information from the entire workspace, while also adding `svelte` and `vite/client` type information.
+1. 移动文件的规则（存在图片，网页快照等大类）
+2. 标签分不清
+3. 找不到未分类的文件
+4. 文件夹作为整体（跳过里面的文件，文件夹当作整体）
 
-**Why include `.vscode/extensions.json`?**
+Require:
 
-Other templates indirectly recommend extensions via the README, but this file allows VS Code to prompt the user to install the recommended extension upon opening the project.
+1. 筛选表达式+标签
+2. 学习tagspaces分组，**只**使用“意图分类”。其他分类使用筛选表达式和隐形标签完成。颜色标签。
+3. 更多的影子标签（不符合移动规则——错误/新文件/发生变化标签）
+4. 文件夹——整体标签
 
-**Why enable `allowJs` in the TS template?**
+---
 
-While `allowJs: false` would indeed prevent the use of `.js` files in the project, it does not prevent the use of JavaScript syntax in `.svelte` files. In addition, it would force `checkJs: false`, bringing the worst of both worlds: not being able to guarantee the entire codebase is TypeScript, and also having worse typechecking for the existing JavaScript. In addition, there are valid use cases in which a mixed codebase may be relevant.
+Demands:
 
-**Why is HMR not preserving my local component state?**
+1. 注释
+2. ui
 
-HMR state preservation comes with a number of gotchas! It has been disabled by default in both `svelte-hmr` and `@sveltejs/vite-plugin-svelte` due to its often surprising behavior. You can read the details [here](https://github.com/rixo/svelte-hmr#svelte-hmr).
+Require:
 
-If you have state that's important to retain within a component, consider creating an external store which would not be replaced by HMR.
+1. 注释box
+2. 按钮池/右键
 
-```ts
-// store.ts
-// An extremely simple external store
-import { writable } from 'svelte/store';
-export default writable(0);
-```
+---
