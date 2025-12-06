@@ -3,10 +3,11 @@ import { db } from './_db';
 db.exec(
   [
     'CREATE TABLE IF NOT EXISTS file_tag (',
-    ' fileId INTEGER NOT NULL PRIMARY KEY,',
-    ' tagId INTEGER NOT NULL PRIMARY KEY,',
-    ' FOREIGN KEY (fileId) REFERENCES file(id) ON DELETE CASCADE',
-    ' FOREIGN KEY (tagId) REFERENCES tag(id) ON DELETE NO ACTION',
+    ' fileId INTEGER NOT NULL,',
+    ' tagId INTEGER NOT NULL,',
+    ' FOREIGN KEY (fileId) REFERENCES file(id) ON DELETE CASCADE,',
+    ' FOREIGN KEY (tagId) REFERENCES tag(id) ON DELETE NO ACTION,',
+    ' PRIMARY KEY (fileId, tagId)',
     ') WITHOUT ROWID;',
   ].join('\n')
 );

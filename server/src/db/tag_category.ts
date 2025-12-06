@@ -44,7 +44,7 @@ const updateStatement = db.prepare<CategoryUpdate, void>(
     ' name = :name,',
     ' background = :background,',
     ' foreground = :foreground,',
-    ' description = :description,',
+    ' description = :description',
     ' WHERE id = :id',
   ].join('\n')
 );

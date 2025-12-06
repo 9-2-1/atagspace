@@ -50,7 +50,7 @@ const updateStatement = db.prepare<TagUpdate, void>(
     ' name = :name,',
     ' background = :background,',
     ' foreground = :foreground,',
-    ' description = :description,',
+    ' description = :description',
     ' WHERE id = :id',
   ].join('\n')
 );
@@ -71,7 +71,7 @@ export function getByName(name: string): Tag | null {
 }
 
 const moveStatement = db.prepare<Pick<Tag, 'id' | 'categoryId'>, void>(
-  'UPDATE tag SET categoryId IS :categoryId WHERE id = :id'
+  'UPDATE tag SET categoryId = :categoryId WHERE id = :id'
 );
 export function move(id: bigint, categoryId: bigint | null): void {
   moveStatement.run({ id, categoryId });
