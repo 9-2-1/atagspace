@@ -113,8 +113,9 @@ export function initDatabase() {
 
 // 导出获取数据库连接的函数
 // 使用类型断言避免返回无法命名的Database类型
-export function getDb() {
-  return initDb() as any;
+export type DatabaseType = Database.Database;
+export function getDb(): DatabaseType {
+  return initDb();
 }
 
 export { DEFAULT_COLOR };

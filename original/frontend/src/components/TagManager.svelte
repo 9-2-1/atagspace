@@ -1,11 +1,11 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { trpc } from '../trpc/client';
-  import type { Category } from '../../../backend/src/db/models/CategoryTag';
+  import type { Tag, Category } from '../../../backend/src/db/models/CategoryTag';
 
   // 状态管理
   let state = {
-    categories: [] as Category[],
+    categories: [] as (Category & {tags: Tag[]})[],
     loading: true,
     error: '',
     newCategory: { name: '', color: '#ffffff' },

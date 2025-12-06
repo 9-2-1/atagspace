@@ -31,9 +31,9 @@ export const CategoryModel = {
     db.prepare('UPDATE category SET name = ? WHERE name = ?').run(newName, name);
   },
 
-  getId: (name: string): number => {
+  getId: (name: string): number | undefined => {
     const db = getDb();
-    return db.prepare('SELECT id FROM category WHERE name = ?').get(name) as number;
+    return db.prepare<[string], number>('SELECT id FROM category WHERE name = ?').get(name);
   },
 
   remove: (name: string): void => {
