@@ -1,5 +1,6 @@
 import * as db from './_db';
-import * as file from './file';
+export * as file from './file';
+export * as tag from './tag';
 
 const transaction = db.db.transaction.bind(db.db);
-export { transaction, file };
+export { transaction };

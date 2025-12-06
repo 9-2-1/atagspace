@@ -1,37 +1,7 @@
-import * as dbfunc from '../../db';
+import * as dbfunc from '../db';
+import { recycle } from '../utils/file/recycle';
 import fs from 'fs';
 import fsP from 'fs/promises';
-
-const nameGroup = 6;
-// aaaaaa
-// aaaaab
-// aaaaac ...
-// zzzzzz
-// zzzzzzaaaaaa
-// zzzzzzaaaaab
-// ...
-function addNameBy1(name: string): string {
-  for (let i = name.length - 1; i >= 0; i--) {
-    if (name[i] === 'z') continue;
-    return (
-      name.slice(0, i) + String.fromCharCode(name.charCodeAt(i) + 1) + 'a'.repeat(nameGroup - i - 1)
-    );
-  }
-  return name + 'a'.repeat(nameGroup);
-}
-function getNextRecycleName(recycleId: bigint): string {
-  const maxName = dbfunc.file.getMaxName(recycleId) ?? '';
-  const nextName = addNameBy1(maxName);
-  return nextName;
-}
-export function recycle_orig(id: bigint): void {
-  const recycleId = getOrCreateDir(null, '<recycle>');
-  const newName = getNextRecycleName(recycleId);
-  const newId = getOrCreateDir(recycleId, newName);
-  dbfunc.file.move(id, newId);
-  dbfunc.file.touchCtime(newId);
-}
-const recycle = dbfunc.transaction(recycle_orig);
 
 export type Callbacks = {
   onFile: (file: dbfunc.file.FileCreate | null, mode: 'add' | 'change' | 'delete') => void;
@@ -57,11 +27,12 @@ export async function syncFile(
     description: null,
   };
   const file = dbfunc.file.getByName(parentId, name);
-  callbacks.onFile(fileCreate, file ? 'change' : 'add');
+  const newfile = file === null;
+  callbacks.onFile(fileCreate, newfile ? 'add' : 'change');
   let fileId = 0n;
   if (file) {
     fileId = file.id;
-    dbfunc.file.update({ id: file.id, ...fileCreate });
+    dbfunc.file.updateMeta({ id: file.id, ...fileCreate });
   } else {
     fileId = dbfunc.file.create(fileCreate);
   }
@@ -72,7 +43,28 @@ export async function syncFile(
       fileCreate.ino = stat.ino;
       fileCreate.size = stat.size;
       fileCreate.mtime = Number(stat.mtimeMs) / 1000;
-      dbfunc.file.update({ id: fileId, ...fileCreate });
+      if (newfile) {
+        // Copy tags and description from matched files before updating metadata
+        if (fileCreate.dev !== null && fileCreate.ino !== null) {
+          const existFile = dbfunc.file.matchDevIno(fileCreate.dev, fileCreate.ino);
+          if (existFile) {
+            fileCreate.description = existFile.description;
+            dbfunc.file.tag.copy(existFile.id, fileId);
+          }
+        }
+        if (fileCreate.size !== null && fileCreate.mtime !== null) {
+          const existFile = dbfunc.file.matchNameSizeMtime(
+            fileCreate.name,
+            fileCreate.size,
+            fileCreate.mtime
+          );
+          if (existFile) {
+            fileCreate.description = existFile.description;
+            dbfunc.file.tag.copy(existFile.id, fileId);
+          }
+        }
+      }
+      dbfunc.file.updateMeta({ id: fileId, ...fileCreate });
       callbacks.onStat(fileCreate, stat);
     } catch (err) {
       console.error(`Error stat ${realPath}: ${err}`);
@@ -116,21 +108,4 @@ export async function syncDir(
   } catch (err) {
     console.error(`Error readdir ${realPath}: ${err}`);
   }
-}
-
-export function getOrCreateDir(parentId: bigint | null, name: string): bigint {
-  let rootId = dbfunc.file.getByName(parentId, name)?.id;
-  if (!rootId) {
-    rootId = dbfunc.file.create({
-      parentId,
-      name,
-      isDir: 1n,
-      dev: null,
-      ino: null,
-      size: null,
-      mtime: null,
-      description: null,
-    });
-  }
-  return rootId;
 }

@@ -1,4 +1,5 @@
 import { db } from './_db';
+export * as tag from './file_tag';
 const SQLNow = "unixepoch('now', 'subsecond')";
 
 db.exec(
@@ -52,7 +53,7 @@ export function create(file: FileCreate): bigint {
 }
 
 export type FileUpdate = Pick<File, 'id' | 'isDir' | 'dev' | 'ino' | 'size' | 'mtime'>;
-const updateStatement = db.prepare<FileUpdate, void>(
+const updateMetaStatement = db.prepare<FileUpdate, void>(
   [
     'UPDATE file SET', // format expand
     ' dev = :dev,',
@@ -64,8 +65,8 @@ const updateStatement = db.prepare<FileUpdate, void>(
     ' WHERE id = :id',
   ].join('\n')
 );
-export function update(file: FileUpdate): void {
-  updateStatement.run(file);
+export function updateMeta(file: FileUpdate): void {
+  updateMetaStatement.run(file);
 }
 
 const getStatement = db.prepare<Pick<File, 'id'>, File>('SELECT * FROM file WHERE id = :id');
@@ -83,7 +84,7 @@ export function getByName(parentId: bigint | null, name: string): File | null {
 const moveStatement = db.prepare<Pick<File, 'id' | 'parentId'>, void>(
   'UPDATE file SET parentId = :parentId WHERE id = :id'
 );
-export function move(id: bigint, parentId: bigint): void {
+export function move(id: bigint, parentId: bigint | null): void {
   moveStatement.run({ id, parentId });
 }
 

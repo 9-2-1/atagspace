@@ -5,9 +5,10 @@ import morgan from 'morgan';
 // import { createExpressMiddleware } from '@trpc/server/adapters/express';
 // import appRouter from './api';
 
-import { syncDir, getOrCreateDir } from './api/file/scan';
-import type { Callbacks } from './api/file/scan';
-import cliprogress from './utils/cliprogress';
+import { syncDir } from './service/scan';
+import { getOrCreateDir } from './utils/file/dir';
+import type { Callbacks } from './service/scan';
+import cliprogress from './utils/progress/cliprogress';
 
 async function test() {
   // 同步目录
