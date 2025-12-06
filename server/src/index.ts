@@ -2,13 +2,15 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import morgan from 'morgan';
-// import { createExpressMiddleware } from '@trpc/server/adapters/express';
-// import appRouter from './api';
+import * as api from './api';
 
 import { syncDir } from './service/scan';
 import { getOrCreateDir } from './utils/file/dir';
 import type { Callbacks } from './service/scan';
 import cliprogress from './utils/progress/cliprogress';
+
+import { registerAPIs } from './utils/apiproxy/server';
+import type { APIdef } from './utils/apiproxy/server';
 
 async function test() {
   // 同步目录
@@ -56,7 +58,7 @@ async function test() {
   );
 }
 
-test();
+real();
 
 export async function real() {
   const app = express();
@@ -67,9 +69,11 @@ export async function real() {
   app.use(cors());
 
   // 初始化数据库
+  // db.init()
 
-  // 注册TRPC API路由
-  // app.use('/api', createExpressMiddleware({ router: appRouter, createContext: () => ({}) }));
+  const router = express.Router();
+  registerAPIs(router, '', api as unknown as APIdef);
+  app.use('/api', router);
 
   // Serve static files from the frontend dist directory
   app.use(express.static(path.join(__dirname, '../../dist')));
