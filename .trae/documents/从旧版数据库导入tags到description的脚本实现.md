@@ -1,6 +1,7 @@
 # 实现计划
 
 ## 功能需求
+
 从旧版atagspace数据库的file表中读取tags字段，去除特定符号后添加到对应文件的description中。
 
 ## 实现步骤
@@ -42,18 +43,18 @@
 db.exec("attach database 'D:\\Documents\\常用\\atagspace\\atagspace.db' as old");
 
 // 查询旧数据库数据
-const oldFiles = db.prepare("SELECT id, path, name, tags FROM old.file").all();
+const oldFiles = db.prepare('SELECT id, path, name, tags FROM old.file').all();
 
 // 使用进度条处理数据
 await cliprogress(
   { processed: 0, total: oldFiles.length, success: 0 },
   100,
-  async (update) => {
+  async update => {
     for (const oldFile of oldFiles) {
       // 处理tags字段
       let tags = oldFile.tags || '';
       tags = tags.replace(/[◆●]/g, '').trim();
-      
+
       if (tags) {
         // 构建虚拟路径并查找对应文件
         const virtualPath = `${oldFile.path}`;
@@ -67,21 +68,23 @@ await cliprogress(
           }
         }
       }
-      
+
       state.processed++;
       update(state);
     }
     return state;
   },
-  (state) => `处理进度: ${state.processed}/${state.total} (成功: ${state.success})`
+  state => `处理进度: ${state.processed}/${state.total} (成功: ${state.success})`
 );
 ```
 
 ## 执行方式
+
 1. 确保项目已编译：`npm run build`
 2. 执行脚本：`node dist/import-tags.js`
 
 ## 预期结果
+
 - 成功处理旧数据库中的所有文件记录
 - 处理后的tags被添加到对应文件的description中
 - 实时显示导入进度和成功率

@@ -3,6 +3,7 @@
   import type { CategoryTag, Tag, FileTag } from './api';
   import { SvelteSet } from 'svelte/reactivity';
   import MyInput from './MyInput.svelte';
+  import ItemSelector from './ItemSelector.svelte';
   import { tick } from 'svelte';
 
   let categoryTags: CategoryTag[] = $state([]);
@@ -69,167 +70,103 @@
   <div class="page">
     <div class="page-left">
       <div>
-        <input
-          type="text"
-          placeholder="Add Category"
-          bind:value={addCategoryInput}
-          onkeydown={async event => {
-            if (event.key === 'Enter') {
-              await API.tag.category.add(addCategoryInput);
-              await reloadTag();
-              addCategoryInput = '';
-            }
+        <ItemSelector
+          items={sortedCategoryTags}
+          selectedIds={selectedCategoryId}
+          addPlaceholder="Add Category"
+          addInputValue={addCategoryInput}
+          onAdd={async value => {
+            await API.tag.category.add(value);
+            await reloadTag();
+            addCategoryInput = '';
           }}
-        />
-        <button
-          class="category-delete"
-          onclick={async () => {
-            // selectedCategoryId.size() && selectedCategoryId.value().next().value ??
+          onDelete={async () => {
             for (const id of selectedCategoryId) {
               await API.tag.category.delete(id);
               await reloadTag();
             }
-          }}>-</button
-        >
-        <input type="color" bind:value={categoryForeColor} />
-        <input type="color" bind:value={categoryBackColor} />
-        <button
-          onclick={async () => {
+          }}
+          onUpdateColors={async () => {
             for (const id of selectedCategoryId) {
               await API.tag.category.color(id, categoryForeColor, categoryBackColor);
             }
             await reloadTag();
             await reloadFile();
           }}
-        >
-          Update
-        </button>
-        <button
-          onclick={async () => {
+          onClearColors={async () => {
             for (const id of selectedCategoryId) {
               await API.tag.category.color(id, null, null);
               await reloadTag();
               await reloadFile();
             }
           }}
-        >
-          Clear
-        </button>
-        {#each sortedCategoryTags as category (category.id)}
-          <button
-            class="category-item"
-            class:selected={selectedCategoryId.has(category.id)}
-            style:--backcolor={category.background}
-            style:--forecolor={category.foreground}
-            onmousedown={event => {
-              event.preventDefault();
-              event.stopPropagation();
-              if (event.button === 0) {
-                selectedCategoryId.clear();
-                selectedCategoryId.add(category.id);
-              }
-              sortCategorySequence = [
-                category.id,
-                ...sortCategorySequence.filter(id => id !== category.id),
-              ];
-            }}
-            oncontextmenu={event => {
-              event.preventDefault();
-              event.stopPropagation();
-            }}
-          >
-            {category.name}
-          </button>
-        {/each}
-      </div>
-      <div>
-        <input
-          type="text"
-          placeholder="Add Tags"
-          bind:value={addTagInput}
-          onkeydown={async event => {
-            if (event.key === 'Enter') {
-              const tagName = addTagInput
-                .split(' ')
-                .map(name => name.trim())
-                .filter(name => name);
-              if (sortCategorySequence.length) {
-                await API.tag.adds(tagName, sortCategorySequence[0]);
-                await reloadTag();
-                addTagInput = '';
-              }
+          foreColor={categoryForeColor}
+          backColor={categoryBackColor}
+          sortSequence={sortCategorySequence}
+          onItemMouseDown={(item, event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            if (event.button === 0) {
+              selectedCategoryId.clear();
+              selectedCategoryId.add(item.id);
             }
+            sortCategorySequence = [item.id, ...sortCategorySequence.filter(id => id !== item.id)];
           }}
         />
-        <button
-          class="tag-delete"
-          onclick={async () => {
+      </div>
+      <div>
+        <ItemSelector
+          items={sortedCategoryTags.flatMap(category => category.tags)}
+          selectedIds={selectedTagId}
+          addPlaceholder="Add Tags"
+          addInputValue={addTagInput}
+          onAdd={async value => {
+            const tagName = value
+              .split(' ')
+              .map(name => name.trim())
+              .filter(name => name);
+            if (sortCategorySequence.length) {
+              await API.tag.adds(tagName, sortCategorySequence[0]);
+              await reloadTag();
+              addTagInput = '';
+            }
+          }}
+          onDelete={async () => {
             await API.tag.deletes([...selectedTagId]);
             await reloadTag();
-          }}>-</button
-        >
-        <input type="color" bind:value={tagForeColor} />
-        <input type="color" bind:value={tagBackColor} />
-        <button
-          onclick={async () => {
+          }}
+          onUpdateColors={async () => {
             await API.tag.colors([...selectedTagId], tagForeColor, tagBackColor);
             await reloadTag();
             await reloadFile();
           }}
-        >
-          Update
-        </button>
-        <button
-          onclick={async () => {
+          onClearColors={async () => {
             await API.tag.colors([...selectedTagId], null, null);
             await reloadTag();
             await reloadFile();
           }}
-        >
-          Clear
-        </button>
-        {#each sorting( sortedCategoryTags.map(category => category.id), sortCategorySequence ) as cateId}
-          {@const cate = categoryMap.get(cateId)}
-          {#if cate}
-            {#each cate.tags as tag (tag.id)}
-              <button
-                class="tag-item"
-                class:selected={selectedTagId.has(tag.id)}
-                style:--backcolor={tag.background ?? cate.background}
-                style:--forecolor={tag.foreground ?? cate.foreground}
-                ondblclick={async () => {
-                  await API.tag.move(tag.id, sortCategorySequence[0]);
-                  await reloadTag();
-                  await reloadFile();
-                }}
-                onmousedown={event => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  if (event.button === 0) {
-                    if (selectedTagId.has(tag.id)) {
-                      selectedTagId.delete(tag.id);
-                    } else {
-                      selectedTagId.add(tag.id);
-                    }
-                  } else if (event.button === 1) {
-                    selectedTagId.clear();
-                    selectedTagId.add(tag.id);
-                  } else if (event.button === 2) {
-                    selectedTagId.clear();
-                  }
-                }}
-                oncontextmenu={event => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                }}
-              >
-                {tag.name}
-              </button>
-            {/each}
-          {:else}
-            <div style:border="1px solid #f00;">Category not found: {cateId}</div>
-          {/if}
-        {/each}
+          foreColor={tagForeColor}
+          backColor={tagBackColor}
+          onItemMouseDown={(item, event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            // Ctrl+left click simulates middle click (button=2)
+            const effectiveButton = event.ctrlKey && event.button === 0 ? 2 : event.button;
+
+            if (effectiveButton === 0) {
+              if (selectedTagId.has(item.id)) {
+                selectedTagId.delete(item.id);
+              } else {
+                selectedTagId.add(item.id);
+              }
+            } else if (effectiveButton === 1) {
+              selectedTagId.clear();
+              selectedTagId.add(item.id);
+            } else if (effectiveButton === 2) {
+              selectedTagId.clear();
+            }
+          }}
+        />
       </div>
     </div>
     <div class="page-right">
@@ -255,13 +192,16 @@
               onmousedown={async event => {
                 event.preventDefault();
                 event.stopPropagation();
-                if (event.button === 0) {
+                // Ctrl+left click simulates middle click (button=2)
+                const effectiveButton = event.ctrlKey && event.button === 0 ? 2 : event.button;
+
+                if (effectiveButton === 0) {
                   await API.file.tag.adds(file.id, [...selectedTagId]);
                   await reloadFile();
-                } else if (event.button === 1) {
+                } else if (effectiveButton === 1) {
                   await API.file.tag.sets(file.id, [...selectedTagId]);
                   await reloadFile();
-                } else if (event.button === 2) {
+                } else if (effectiveButton === 2) {
                   await API.file.tag.deletes(file.id, [...selectedTagId]);
                   await reloadFile();
                 }
@@ -305,16 +245,19 @@
                   onmousedown={event => {
                     event.preventDefault();
                     event.stopPropagation();
-                    if (event.button === 0) {
+                    // Ctrl+left click simulates middle click (button=2)
+                    const effectiveButton = event.ctrlKey && event.button === 0 ? 2 : event.button;
+
+                    if (effectiveButton === 0) {
                       if (selectedTagId.has(tag.id)) {
                         selectedTagId.delete(tag.id);
                       } else {
                         selectedTagId.add(tag.id);
                       }
-                    } else if (event.button === 1) {
+                    } else if (effectiveButton === 1) {
                       selectedTagId.clear();
                       selectedTagId.add(tag.id);
-                    } else if (event.button === 2) {
+                    } else if (effectiveButton === 2) {
                       selectedTagId.clear();
                     }
                   }}
@@ -396,29 +339,7 @@
     .hsplit(auto 1fr);
   }
 
-  .tag-item {
-    margin: 2px;
-    padding: 2px;
-    border: 1px solid var(--forecolor, #707070);
-    background-color: var(--backcolor, #f0f0f0);
-    color: var(--forecolor, #707070);
-    outline: 1px solid #808080;
-    &.selected {
-      border-bottom-width: 4px;
-    }
-  }
-
-  .category-item {
-    margin: 2px;
-    padding: 2px;
-    border: 1px solid var(--forecolor, #707070);
-    background-color: var(--backcolor, #f0f0f0);
-    color: var(--forecolor, #707070);
-    outline: 1px solid #808080;
-    &.selected {
-      border-bottom-width: 4px;
-    }
-  }
+  /* Category and tag styles now handled by ItemSelector component */
 
   .file {
     border: 1px solid #808080;
