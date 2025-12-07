@@ -10,6 +10,12 @@
 
   const urlParams = new URLSearchParams(window.location.search);
   const isTest = urlParams.has('test');
+
+  let progress = $state(80);
+  let message = $state('hello');
+  let progresscolor = $state('lightgreen');
+  let backcolor = $state('white');
+  let forecolor = $state('black');
 </script>
 
 <main>
@@ -19,23 +25,24 @@
     <div class="page">
       <div class="page-left">
         <div>
-          <Category />
+          <Category {categorylist} bind:{categoryselection} />
         </div>
         <div>
-          <Tags />
+          <Tags {taglist} bind:{tagselection} />
         </div>
       </div>
       <div class="page-middle">
         <div>
-          <Navigation />
+          <Navigation bind:{curpath} />
         </div>
         <div>
-          <Explorer />
+          <Explorer {filelist} bind:{selection} bind:{current} />
         </div>
         <div>
-          <StatusBar />
+          <StatusBar {progress} {message} {progresscolor} {backcolor} {forecolor} />
         </div>
       </div>
+      <!--
       <div class="page-right">
         <div>
           <Name />
@@ -44,6 +51,7 @@
           <Preview />
         </div>
       </div>
+      -->
     </div>
   {/if}
 </main>
@@ -62,8 +70,6 @@
 
   .split() {
     display: grid;
-    place-items: stretch;
-    place-content: stretch;
     width: 100%;
     height: 100%;
   }
@@ -74,6 +80,7 @@
     grid-template-rows: 1fr;
     > div {
       border-right: 1px solid #e0e0e0;
+      overflow: auto;
     }
   }
 
@@ -83,11 +90,12 @@
     grid-template-rows: @vsp;
     > div {
       border-bottom: 1px solid #e0e0e0;
+      overflow: auto;
     }
   }
 
   .page {
-    .vsplit(1fr 2fr 1fr);
+    .vsplit(1fr 2fr);
   }
 
   .page-left {
