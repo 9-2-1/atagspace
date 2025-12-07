@@ -1,7 +1,12 @@
 import * as dbfunc from '../../db';
 
-export function list(parentId: bigint | null): dbfunc.file.File[] {
-  return dbfunc.file.list(parentId);
+export type FileTag = dbfunc.file.File & { tags: dbfunc.tag.Tag[] };
+
+export function list(parentId: bigint | null): FileTag[] {
+  return dbfunc.file.list(parentId).map((file) => ({
+    ...file,
+    tags: dbfunc.file.tag.list(file.id).map((tagId) => dbfunc.tag.get(tagId)!),
+  }));
 }
 
 export function describe(fileId: bigint, description: string | null) {

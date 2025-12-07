@@ -4,8 +4,9 @@ import fs from 'fs';
 import fsP from 'fs/promises';
 
 export type Callbacks = {
-  onFile: (file: dbfunc.file.FileCreate | null, mode: 'add' | 'change' | 'delete') => void;
-  onStat: (file: dbfunc.file.FileCreate | null, stat: fs.BigIntStats) => void;
+  onFile: (file: dbfunc.file.FileCreate | null, mode: 'add' | 'change' | 'delete', path: string) => void;
+  onStat: (file: dbfunc.file.FileCreate | null, stat: fs.BigIntStats, path: string) => void;
+  onRecover: (file: dbfunc.file.FileCreate | null, path: string) => void;
 };
 // realPath => parentId.name
 export async function syncFile(
@@ -28,7 +29,7 @@ export async function syncFile(
   };
   const file = dbfunc.file.getByName(parentId, name);
   const newfile = file === null;
-  callbacks.onFile(fileCreate, newfile ? 'add' : 'change');
+  callbacks.onFile(fileCreate, newfile ? 'add' : 'change', realPath);
   let fileId = 0n;
   if (file) {
     fileId = file.id;
@@ -48,6 +49,7 @@ export async function syncFile(
         if (fileCreate.dev !== null && fileCreate.ino !== null) {
           const existFile = dbfunc.file.matchDevIno(fileCreate.dev, fileCreate.ino);
           if (existFile) {
+            callbacks.onRecover(existFile, realPath);
             fileCreate.description = existFile.description;
             dbfunc.file.tag.copy(existFile.id, fileId);
           }
@@ -59,13 +61,14 @@ export async function syncFile(
             fileCreate.mtime
           );
           if (existFile) {
+            callbacks.onRecover(existFile, realPath);
             fileCreate.description = existFile.description;
             dbfunc.file.tag.copy(existFile.id, fileId);
           }
         }
       }
       dbfunc.file.updateMeta({ id: fileId, ...fileCreate });
-      callbacks.onStat(fileCreate, stat);
+      callbacks.onStat(fileCreate, stat, realPath);
     } catch (err) {
       console.error(`Error stat ${realPath}: ${err}`);
     }
@@ -102,7 +105,7 @@ export async function syncDir(
     );
     // delete items2 not in items
     for (const file of todelete.values()) {
-      callbacks.onFile(file, 'delete');
+      callbacks.onFile(file, 'delete', `${realPath}/${file.name}`);
       recycle(file.id);
     }
   } catch (err) {

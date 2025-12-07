@@ -10,11 +10,11 @@ import type { Callbacks } from './service/scan';
 import cliprogress from './utils/progress/cliprogress';
 
 import { registerAPIs } from './utils/apiproxy/server';
-import type { APIdef } from './utils/apiproxy/server';
+import type { APIdef, BeAwait } from './utils/apiproxy/server';
 
 async function test() {
   // 同步目录
-  const state = { list: 0, stat: 0, add: 0, change: 0, delete: 0 };
+  const state = { list: 0, stat: 0, add: 0, change: 0, delete: 0, recover: 0, current: "" };
   await cliprogress(
     state,
     100,
@@ -31,10 +31,16 @@ async function test() {
           }
           update(state);
         },
-        onStat: () => {
+        onStat: (file, stat, path) => {
+          state.current = path;
           state.stat++;
           update(state);
         },
+        onRecover: (file, path) => {
+          console.log(`${path}: recover tags from ${file?.name}`);
+          state.recover++;
+          update(state);
+        }
       };
       await Promise.all([
         syncDir('D:/Pictures/Screenshots', getOrCreateDir(null, 'Screenshots'), callbacks),
@@ -53,14 +59,20 @@ async function test() {
       ]);
     },
     state => {
-      return `list: ${state.list}, stat: ${state.stat}, add: ${state.add}, change: ${state.change}, delete: ${state.delete}`;
+      return `${state.stat} +${state.add} -${state.delete} ~${state.recover} ${state.current}`;
     }
   );
 }
 
-real();
+if (process.argv.includes('--test')) {
+  test();
+} else {
+  main();
+}
 
-export async function real() {
+export type APIType = BeAwait<typeof api>;
+
+export async function main() {
   const app = express();
   const port = 4590;
 

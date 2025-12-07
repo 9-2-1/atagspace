@@ -1,5 +1,4 @@
 import { db } from './_db';
-export * as category from './tag_category';
 
 db.exec(
   [
@@ -16,6 +15,8 @@ db.exec(
     'CREATE INDEX IF NOT EXISTS tag_categoryId ON tag (categoryId);',
   ].join('\n')
 );
+
+export * as category from './tag_category';
 
 export type Tag = {
   id: bigint;

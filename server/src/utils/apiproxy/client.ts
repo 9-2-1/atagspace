@@ -1,8 +1,10 @@
+import * as devalue from 'devalue';
+
 function noop() {}
 
 async function callapi(path: string, ...args: unknown[]) {
-  const res = await fetch(path, { method: 'POST', body: JSON.stringify(args) });
-  const ret = await res.json();
+  const res = await fetch(path, { method: 'POST', body: devalue.stringify(Array.from(args)), headers: { 'Content-Type': 'application/json' } });
+  const ret = devalue.unflatten(await res.json());
   if (ret.error) {
     throw new Error(ret.error);
   }
@@ -15,7 +17,6 @@ export function APIproxy(path: string): unknown {
       if (typeof prop === 'symbol') {
         return Reflect.get(target, prop, receiver);
       }
-      console.log('get', path, prop);
       return APIproxy(`${path}/${prop}`);
     },
     apply(target, thisArg, argumentsList) {

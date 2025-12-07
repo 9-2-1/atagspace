@@ -1,5 +1,4 @@
 import { db } from './_db';
-export * as tag from './file_tag';
 const SQLNow = "unixepoch('now', 'subsecond')";
 
 db.exec(
@@ -22,6 +21,8 @@ db.exec(
     'CREATE INDEX IF NOT EXISTS file_name_size_mtime_ctime ON file (name, size, mtime, ctime);',
   ].join('\n')
 );
+
+export * as tag from './file_tag';
 
 export type File = {
   id: bigint;

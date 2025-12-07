@@ -1,3 +1,3 @@
-export * as file from './file';
-export * as tag from './tag';
+export * as file from './file/index';
+export * as tag from './tag/index';
 export * as source from './source';
