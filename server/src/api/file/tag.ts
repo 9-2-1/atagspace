@@ -1,6 +1,6 @@
 import * as dbfunc from '../../db';
 
-export function set(fileId: bigint, tagIds: bigint[]) {
+export function sets(fileId: bigint, tagIds: bigint[]) {
   clear(fileId);
   adds(fileId, tagIds);
 }

@@ -8,6 +8,7 @@ import { syncDir } from './service/scan';
 import { getOrCreateDir } from './utils/file/dir';
 import type { Callbacks } from './service/scan';
 import cliprogress from './utils/progress/cliprogress';
+import { syncConfigs } from './config';
 
 import { registerAPIs } from './utils/apiproxy/server';
 import type { APIdef, BeAwait } from './utils/apiproxy/server';
@@ -42,21 +43,11 @@ async function test() {
           update(state);
         },
       };
-      await Promise.all([
-        syncDir('D:/Pictures/Screenshots', getOrCreateDir(null, 'Screenshots'), callbacks),
-        syncDir('D:/Pictures/Saved Pictures', getOrCreateDir(null, 'Saved Pictures'), callbacks),
-        syncDir('D:/Pictures/Camera Roll', getOrCreateDir(null, 'Camera Roll'), callbacks),
-        syncDir('D:/OneDrive', getOrCreateDir(null, 'OneDrive'), callbacks),
-        syncDir('D:/Downloads', getOrCreateDir(null, 'Downloads'), callbacks),
-        syncDir('F:/分类/139', getOrCreateDir(null, '139'), callbacks),
-        syncDir('F:/分类/aliyun', getOrCreateDir(null, 'aliyun'), callbacks),
-        syncDir('F:/分类/baidu', getOrCreateDir(null, 'baidu'), callbacks),
-        syncDir('F:/分类/qbit', getOrCreateDir(null, 'qbit'), callbacks),
-        syncDir('F:/分类/quark', getOrCreateDir(null, 'quark'), callbacks),
-        syncDir('F:/分类/xunlei', getOrCreateDir(null, 'xunlei'), callbacks),
-        syncDir('F:/分类/下载', getOrCreateDir(null, '下载'), callbacks),
-        syncDir('F:/分类/有损压缩', getOrCreateDir(null, '有损压缩'), callbacks),
-      ]);
+      await Promise.all(
+        syncConfigs.map(config =>
+          syncDir(config.realPath, getOrCreateDir(null, config.virtualName), callbacks)
+        )
+      );
     },
     state => {
       return `${state.stat} +${state.add} -${state.delete} ~${state.recover} ${state.current}`;

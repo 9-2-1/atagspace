@@ -80,11 +80,11 @@ export function describe(id: bigint, description: string | null): void {
   descStatement.run({ id, description });
 }
 
-const colorStatement = db.prepare<Pick<Category, 'id' | 'background' | 'foreground'>, void>(
-  'UPDATE category SET background = :background, foreground = :foreground WHERE id = :id'
+const colorStatement = db.prepare<Pick<Category, 'id' | 'foreground' | 'background'>, void>(
+  'UPDATE category SET foreground = :foreground, background = :background WHERE id = :id'
 );
-export function color(id: bigint, background: string | null, foreground: string | null): void {
-  colorStatement.run({ id, background, foreground });
+export function color(id: bigint, foreground: string | null, background: string | null): void {
+  colorStatement.run({ id, foreground, background });
 }
 
 const deleteStatement = db.prepare<Pick<Category, 'id'>, void>(

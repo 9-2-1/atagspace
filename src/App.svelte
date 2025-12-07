@@ -89,7 +89,7 @@
               await API.tag.category.delete(id);
               await reloadTag();
             }
-          }}>[-]</button
+          }}>-</button
         >
         <input type="color" bind:value={categoryForeColor} />
         <input type="color" bind:value={categoryBackColor} />
@@ -99,6 +99,7 @@
               await API.tag.category.color(id, categoryForeColor, categoryBackColor);
             }
             await reloadTag();
+            await reloadFile();
           }}
         >
           Update
@@ -108,6 +109,7 @@
             for (const id of selectedCategoryId) {
               await API.tag.category.color(id, null, null);
               await reloadTag();
+              await reloadFile();
             }
           }}
         >
@@ -120,6 +122,8 @@
             style:--backcolor={category.background}
             style:--forecolor={category.foreground}
             onmousedown={event => {
+              event.preventDefault();
+              event.stopPropagation();
               if (event.button === 0) {
                 selectedCategoryId.clear();
                 selectedCategoryId.add(category.id);
@@ -128,8 +132,6 @@
                 category.id,
                 ...sortCategorySequence.filter(id => id !== category.id),
               ];
-              event.preventDefault();
-              event.stopPropagation();
             }}
             oncontextmenu={event => {
               event.preventDefault();
@@ -164,7 +166,7 @@
           onclick={async () => {
             await API.tag.deletes([...selectedTagId]);
             await reloadTag();
-          }}>[-]</button
+          }}>-</button
         >
         <input type="color" bind:value={tagForeColor} />
         <input type="color" bind:value={tagBackColor} />
@@ -195,18 +197,26 @@
                 class:selected={selectedTagId.has(tag.id)}
                 style:--backcolor={tag.background ?? cate.background}
                 style:--forecolor={tag.foreground ?? cate.foreground}
-                ondblclick={() => {}}
+                ondblclick={async () => {
+                  await API.tag.move(tag.id, sortCategorySequence[0]);
+                  await reloadTag();
+                  await reloadFile();
+                }}
                 onmousedown={event => {
-                  if (event.button === 0) {
-                    selectedTagId.clear();
-                    selectedTagId.add(tag.id);
-                  } else if (event.button === 1) {
-                    selectedTagId.delete(tag.id);
-                  } else if (event.button === 2) {
-                    selectedTagId.add(tag.id);
-                  }
                   event.preventDefault();
                   event.stopPropagation();
+                  if (event.button === 0) {
+                    if (selectedTagId.has(tag.id)) {
+                      selectedTagId.delete(tag.id);
+                    } else {
+                      selectedTagId.add(tag.id);
+                    }
+                  } else if (event.button === 1) {
+                    selectedTagId.clear();
+                    selectedTagId.add(tag.id);
+                  } else if (event.button === 2) {
+                    selectedTagId.clear();
+                  }
                 }}
                 oncontextmenu={event => {
                   event.preventDefault();
@@ -238,26 +248,48 @@
       <div>
         {#each sortedCurrentFiles as file (file.id)}
           <div class="file">
-            <div
-              onclick={() => {
-                currentDirId = file.id;
-                upDirList.push(file);
-              }}
-            >
+            <div>
               {file.name}
             </div>
-            <div>
-              <button
-                onclick={async () => {
+            <div
+              onmousedown={async event => {
+                event.preventDefault();
+                event.stopPropagation();
+                if (event.button === 0) {
                   await API.file.tag.adds(file.id, [...selectedTagId]);
                   await reloadFile();
-                }}>[+]</button
-              >
-              <button
-                onclick={async () => {
+                } else if (event.button === 1) {
+                  await API.file.tag.sets(file.id, [...selectedTagId]);
+                  await reloadFile();
+                } else if (event.button === 2) {
                   await API.file.tag.deletes(file.id, [...selectedTagId]);
                   await reloadFile();
-                }}>[-]</button
+                }
+              }}
+              oncontextmenu={event => {
+                event.preventDefault();
+                event.stopPropagation();
+              }}
+            >
+              <button
+                onmousedown={async event => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  if (event.button == 0) {
+                    if (file.isDir) {
+                      currentDirId = file.id;
+                      upDirList.push(file);
+                    } else {
+                      await API.file.openFile(file.id);
+                    }
+                  }
+                }}>O</button
+              >
+              <button
+                onmousedown={async event => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                }}>=</button
               >
               {#each file.tags as tag (tag.id)}
                 <button
@@ -265,18 +297,26 @@
                   class:selected={selectedTagId.has(tag.id)}
                   style:--backcolor={tag.background ?? tag.category.background}
                   style:--forecolor={tag.foreground ?? tag.category.foreground}
-                  ondblclick={() => {}}
+                  ondblclick={async () => {
+                    await API.tag.move(tag.id, sortCategorySequence[0]);
+                    await reloadTag();
+                    await reloadFile();
+                  }}
                   onmousedown={event => {
-                    if (event.button === 0) {
-                      selectedTagId.clear();
-                      selectedTagId.add(tag.id);
-                    } else if (event.button === 1) {
-                      selectedTagId.delete(tag.id);
-                    } else if (event.button === 2) {
-                      selectedTagId.add(tag.id);
-                    }
                     event.preventDefault();
                     event.stopPropagation();
+                    if (event.button === 0) {
+                      if (selectedTagId.has(tag.id)) {
+                        selectedTagId.delete(tag.id);
+                      } else {
+                        selectedTagId.add(tag.id);
+                      }
+                    } else if (event.button === 1) {
+                      selectedTagId.clear();
+                      selectedTagId.add(tag.id);
+                    } else if (event.button === 2) {
+                      selectedTagId.clear();
+                    }
                   }}
                   oncontextmenu={event => {
                     event.preventDefault();
@@ -382,10 +422,13 @@
 
   .file {
     border: 1px solid #808080;
-    height: 75px;
+    height: 90px;
     display: grid;
     grid-template-rows: 1fr 1fr 1fr;
     > div {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
       padding: 2px;
     }
   }

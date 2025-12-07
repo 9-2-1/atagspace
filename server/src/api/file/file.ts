@@ -12,6 +12,14 @@ export function describe(fileId: bigint, description: string | null) {
   dbfunc.file.describe(fileId, description);
 }
 
+import open from 'open';
+import { getRealPath } from '../../utils/file/path';
+
+export async function openFile(fileId: bigint) {
+  const realPath = getRealPath(fileId);
+  await open(realPath);
+}
+
 /// search
 /// NOT
 

@@ -87,7 +87,9 @@ export async function syncDir(
   callbacks: Callbacks
 ): Promise<void> {
   try {
-    const items = await fsP.readdir(realPath, { withFileTypes: true });
+    const items = (await fsP.readdir(realPath, { withFileTypes: true })).filter(
+      item => !item.name.startsWith('.')
+    );
     const items2 = dbfunc.file.list(fileId);
     // Map<name, File>
     const todelete = new Map(items2.map(item => [item.name, item]));
