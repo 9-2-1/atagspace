@@ -10,8 +10,11 @@ function delete_(categoryId: bigint) {
   dbfunc.tag.category.delete(categoryId);
 }
 export { delete_ as delete };
-export function list(): dbfunc.tag.category.Category[] {
-  return dbfunc.tag.category.list();
+export type CategoryTag = dbfunc.tag.category.Category & { tags: dbfunc.tag.Tag[] };
+export function list(): CategoryTag[] {
+  return dbfunc.tag.category
+    .list()
+    .map(category => ({ ...category, tags: dbfunc.tag.list(category.id) }));
 }
 export function color(categoryId: bigint, foreground: string | null, background: string | null) {
   dbfunc.tag.category.color(categoryId, foreground, background);

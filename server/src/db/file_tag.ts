@@ -37,7 +37,9 @@ export function deleteAll(fileId: bigint): void {
   deleteAllStatement.run(fileId);
 }
 
-const listStatement = db.prepare<bigint, bigint>('SELECT tagId FROM file_tag WHERE fileId = ?');
+const listStatement = db
+  .prepare<bigint, bigint>('SELECT tagId FROM file_tag WHERE fileId = ?')
+  .pluck();
 export function list(fileId: bigint): bigint[] {
   return listStatement.all(fileId);
 }

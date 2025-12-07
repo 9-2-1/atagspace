@@ -4,7 +4,11 @@ import fs from 'fs';
 import fsP from 'fs/promises';
 
 export type Callbacks = {
-  onFile: (file: dbfunc.file.FileCreate | null, mode: 'add' | 'change' | 'delete', path: string) => void;
+  onFile: (
+    file: dbfunc.file.FileCreate | null,
+    mode: 'add' | 'change' | 'delete',
+    path: string
+  ) => void;
   onStat: (file: dbfunc.file.FileCreate | null, stat: fs.BigIntStats, path: string) => void;
   onRecover: (file: dbfunc.file.FileCreate | null, path: string) => void;
 };

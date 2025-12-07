@@ -1,12 +1,11 @@
 import * as dbfunc from '../../db';
+import * as file_tag from './tag';
+import type { TagCategory } from './tag';
 
-export type FileTag = dbfunc.file.File & { tags: dbfunc.tag.Tag[] };
+export type FileTag = dbfunc.file.File & { tags: TagCategory[] };
 
 export function list(parentId: bigint | null): FileTag[] {
-  return dbfunc.file.list(parentId).map((file) => ({
-    ...file,
-    tags: dbfunc.file.tag.list(file.id).map((tagId) => dbfunc.tag.get(tagId)!),
-  }));
+  return dbfunc.file.list(parentId).map(file => ({ ...file, tags: file_tag.list(file.id) }));
 }
 
 export function describe(fileId: bigint, description: string | null) {

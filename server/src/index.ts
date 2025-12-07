@@ -14,7 +14,7 @@ import type { APIdef, BeAwait } from './utils/apiproxy/server';
 
 async function test() {
   // 同步目录
-  const state = { list: 0, stat: 0, add: 0, change: 0, delete: 0, recover: 0, current: "" };
+  const state = { list: 0, stat: 0, add: 0, change: 0, delete: 0, recover: 0, current: '' };
   await cliprogress(
     state,
     100,
@@ -40,7 +40,7 @@ async function test() {
           console.log(`${path}: recover tags from ${file?.name}`);
           state.recover++;
           update(state);
-        }
+        },
       };
       await Promise.all([
         syncDir('D:/Pictures/Screenshots', getOrCreateDir(null, 'Screenshots'), callbacks),

@@ -29,6 +29,9 @@ importers:
       '@eslint/js':
         specifier: ^9.39.1
         version: 9.39.1
+      '@svar-ui/svelte-menu':
+        specifier: ^2.3.1
+        version: 2.3.1
       '@sveltejs/vite-plugin-svelte':
         specifier: ^6.2.1
         version: 6.2.1(svelte@5.45.5)(vite@7.2.6(@types/node@24.10.1)(less@4.4.2))
@@ -667,6 +670,42 @@ packages:
       }
     cpu: [x64]
     os: [win32]
+
+  '@svar-ui/core-locales@2.3.1':
+    resolution:
+      {
+        integrity: sha512-wv1oWjNVUoG2s3E0TOFvDVAv29WrSzfsS4bjsop9sFF7VAUIJ7wGGGkTbJcBTJZvAuKNFm10/mY1jV253cPXfQ==,
+      }
+
+  '@svar-ui/lib-dom@0.9.2':
+    resolution:
+      {
+        integrity: sha512-U/+2dPuO4GvCxPfyA20XP+cn/5NqJjobS/ZvwTUj1UVMycnIkFRVukboV58LviP5mLJw4o/k1vAgank7sfBEpA==,
+      }
+
+  '@svar-ui/lib-state@1.9.6':
+    resolution:
+      {
+        integrity: sha512-twoHa8wZvzdxtES68s6Wnp4Xi1WivScNaFFK6sJ6WDgqVYOzJw0ZhVVrdwHQgieLITTKl/DYh/U3nuqtMetKYw==,
+      }
+
+  '@svar-ui/lib-svelte@0.5.2':
+    resolution:
+      {
+        integrity: sha512-i+hHMT3zctaGbRpyMDREt9im7YfLpvGwFYvH1ntEp/kYAwUrR/sxMJlEEKIid+Yg2EeMUstGxmYQbkWoMpPG7A==,
+      }
+
+  '@svar-ui/svelte-core@2.3.1':
+    resolution:
+      {
+        integrity: sha512-5ZrEcNX62UtQeB6GlpV15PRwiG7PvUYRdFR+tBjfXJr6Tw/xy1VN9VdwuV/1wXhgE+SSfnyUrJALfrAhGmfNIw==,
+      }
+
+  '@svar-ui/svelte-menu@2.3.1':
+    resolution:
+      {
+        integrity: sha512-UWIhAR9iOhWL1LkhV2DcDF7eE36bb5NUbpkk4MVL6bDretapBfmIIgfqXvMmyIskKz0i43vVXY5zbiBeYz1obg==,
+      }
 
   '@sveltejs/acorn-typescript@1.0.8':
     resolution:
@@ -3113,6 +3152,27 @@ snapshots:
 
   '@rollup/rollup-win32-x64-msvc@4.53.3':
     optional: true
+
+  '@svar-ui/core-locales@2.3.1': {}
+
+  '@svar-ui/lib-dom@0.9.2': {}
+
+  '@svar-ui/lib-state@1.9.6': {}
+
+  '@svar-ui/lib-svelte@0.5.2':
+    dependencies:
+      '@svar-ui/lib-state': 1.9.6
+
+  '@svar-ui/svelte-core@2.3.1':
+    dependencies:
+      '@svar-ui/core-locales': 2.3.1
+      '@svar-ui/lib-dom': 0.9.2
+      '@svar-ui/lib-svelte': 0.5.2
+
+  '@svar-ui/svelte-menu@2.3.1':
+    dependencies:
+      '@svar-ui/lib-dom': 0.9.2
+      '@svar-ui/svelte-core': 2.3.1
 
   '@sveltejs/acorn-typescript@1.0.8(acorn@8.15.0)':
     dependencies:

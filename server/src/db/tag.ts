@@ -4,7 +4,7 @@ db.exec(
   [
     'CREATE TABLE IF NOT EXISTS tag (',
     ' id INTEGER NOT NULL PRIMARY KEY,',
-    ' categoryId INTEGER,', // nullable
+    ' categoryId INTEGER NOT NULL,', // Not nullable
     ' name TEXT NOT NULL,',
     ' background TEXT, ', // background color (nullable)
     ' foreground TEXT, ', // foreground color (nullable)
@@ -20,7 +20,7 @@ export * as category from './tag_category';
 
 export type Tag = {
   id: bigint;
-  categoryId: bigint | null;
+  categoryId: bigint;
   name: string;
   background: string | null; // background color (nullable)
   foreground: string | null; // foreground color (nullable)
@@ -74,7 +74,7 @@ export function getByName(name: string): Tag | null {
 const moveStatement = db.prepare<Pick<Tag, 'id' | 'categoryId'>, void>(
   'UPDATE tag SET categoryId = :categoryId WHERE id = :id'
 );
-export function move(id: bigint, categoryId: bigint | null): void {
+export function move(id: bigint, categoryId: bigint): void {
   moveStatement.run({ id, categoryId });
 }
 
@@ -92,11 +92,11 @@ export function describe(id: bigint, description: string | null): void {
   descStatement.run({ id, description });
 }
 
-const colorStatement = db.prepare<Pick<Tag, 'id' | 'background' | 'foreground'>, void>(
-  'UPDATE tag SET background = :background, foreground = :foreground WHERE id = :id'
+const colorStatement = db.prepare<Pick<Tag, 'id' | 'foreground' | 'background'>, void>(
+  'UPDATE tag SET foreground = :foreground, background = :background WHERE id = :id'
 );
-export function color(id: bigint, background: string | null, foreground: string | null): void {
-  colorStatement.run({ id, background, foreground });
+export function color(id: bigint, foreground: string | null, background: string | null): void {
+  colorStatement.run({ id, foreground, background });
 }
 
 const deleteStatement = db.prepare<Pick<Tag, 'id'>, void>('DELETE FROM tag WHERE id = :id');
@@ -106,9 +106,9 @@ function delete_(id: bigint): void {
 export { delete_ as delete };
 
 const listStatement = db.prepare<Pick<Tag, 'categoryId'>, Tag>(
-  'SELECT * FROM tag WHERE categoryId IS :categoryId'
+  'SELECT * FROM tag WHERE categoryId = :categoryId'
 );
-export function list(categoryId: bigint | null): Tag[] {
+export function list(categoryId: bigint): Tag[] {
   return listStatement.all({ categoryId });
 }
 

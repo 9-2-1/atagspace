@@ -14,7 +14,7 @@ export default async function cliprogress<State, Result>(
         rendered = false;
       }
       originalLog(...args);
-    }
+    };
   }
   let lastUpdate = 0;
   function update(state: State, force: boolean = false) {

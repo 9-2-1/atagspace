@@ -18,19 +18,19 @@ export function registerAPIs(router: Router, path: string, apiDef: APIdef) {
       try {
         const args = devalue.unflatten(req.body);
         const retn = await apiDef(...args);
-        ret={ result: retn }
+        ret = { result: retn };
       } catch (err) {
         console.error(err);
-          status = 500;
+        status = 500;
         if (err instanceof Error) {
           ret = { error: err.message };
         } else {
           ret = { error: 'Unknown error' };
         }
       }
-        res.writeHead(status, { 'Content-Type': 'application/json' });
-        res.write(devalue.stringify(ret));
-        res.end();
+      res.writeHead(status, { 'Content-Type': 'application/json' });
+      res.write(devalue.stringify(ret));
+      res.end();
     });
   } else {
     for (const [name, def] of Object.entries(apiDef)) {

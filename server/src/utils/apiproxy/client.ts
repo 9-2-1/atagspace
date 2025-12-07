@@ -3,7 +3,11 @@ import * as devalue from 'devalue';
 function noop() {}
 
 async function callapi(path: string, ...args: unknown[]) {
-  const res = await fetch(path, { method: 'POST', body: devalue.stringify(Array.from(args)), headers: { 'Content-Type': 'application/json' } });
+  const res = await fetch(path, {
+    method: 'POST',
+    body: devalue.stringify(Array.from(args)),
+    headers: { 'Content-Type': 'application/json' },
+  });
   const ret = devalue.unflatten(await res.json());
   if (ret.error) {
     throw new Error(ret.error);
